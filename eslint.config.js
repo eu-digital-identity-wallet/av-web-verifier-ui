@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 European Commission
+//
+// SPDX-License-Identifier: Apache-2.0
+
 import js from '@eslint/js';
 import globals from 'globals';
 import reactHooks from 'eslint-plugin-react-hooks';

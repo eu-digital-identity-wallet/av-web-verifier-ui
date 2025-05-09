@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 European Commission
+//
+// SPDX-License-Identifier: Apache-2.0
+
 export default function Footer() {
   return (
     <div className="fixed bottom-0 left-0 w-full border-t border-t-gray-600 bg-white">

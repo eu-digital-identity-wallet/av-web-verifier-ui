@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2025 European Commission
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 ![Proof of age attestations for all Europeans - An age verification solution for EU citizens and residents](./docs/media/top-banner-av.png)
 
 # Age Verification (AV) Verifier Example Application
