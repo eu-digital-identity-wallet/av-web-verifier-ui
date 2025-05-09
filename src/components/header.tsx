@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 European Commission
+//
+// SPDX-License-Identifier: Apache-2.0
+
 export default function Header() {
   return (
     <div className="p-4 shadow-lg rounded-lg flex justify-between items-center">

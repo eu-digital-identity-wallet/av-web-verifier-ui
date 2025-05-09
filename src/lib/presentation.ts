@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 European Commission
+//
+// SPDX-License-Identifier: Apache-2.0
+
 import { type PresentationFields } from './types';
 import { v4 as uuidv4 } from 'uuid';
 

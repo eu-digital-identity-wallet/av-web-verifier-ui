@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 European Commission
+//
+// SPDX-License-Identifier: Apache-2.0
+
 import { Buffer } from 'buffer';
 import { decode as CborDecode } from 'cbor-x';
 import {
