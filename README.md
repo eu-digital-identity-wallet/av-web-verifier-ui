@@ -1,6 +1,6 @@
-# Age Verification (AV) Verifier Example Application
-
 ![Proof of age attestations for all Europeans - An age verification solution for EU citizens and residents](./docs/media/top-banner-av.png)
+
+# Age Verification (AV) Verifier Example Application
 
 Simple Verifier UI that provides a single Presentation Request for an Age Credential in MDOC format.
 
