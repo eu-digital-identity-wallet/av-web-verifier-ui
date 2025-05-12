@@ -110,7 +110,7 @@ npm run dev
   * Open your browser and navigate to http://localhost:5173.
   * You should see the Verifier web application running locally.
 
-**Note**
+*Note:*
 * If you encounter any issues with dependencies, ensure that your Node.js and npm versions are compatible with the project requirements.
 * The backend service must be running and accessible at the URL you specified in the .env file.
 
