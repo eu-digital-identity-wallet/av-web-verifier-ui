@@ -28,7 +28,7 @@ SPDX-License-Identifier: Apache-2.0
 
 ## About
 
-The Age Verification Verifier Service is part of the Age Verification Solution Toolbox and serves as a component that can be used by memberstates, if necessary, to develop a national solution and build upon the building blocks of the toolbox.
+The Age Verification Verifier Service is part of the Age Verification Solution Toolbox and serves as a component that can be used by member states, if necessary, to develop a national solution and build upon the building blocks of the toolbox.
 
 The Verifier Service consists of two components: the frontend (UI) and the actual verifier backend. This repository contains only the source code of the Age Verification Verifier Service frontend. To operate and use the verifier, it is necessary to install both the frontend and the backend.
 
@@ -38,23 +38,25 @@ A more comprehensive and illustrative use case for a verifier can be found in th
 
 ## Disclaimer
 
-This is an initial version of the software, developed solely for the purpose of demonstrating the business flow of the solution. It is not intended for production use, and does not yet include the full set of functional, security, or integration features required for a live deployment.
+This is an initial version of the software, developed solely for the purpose of demonstrating the business flow of the solution. It is not intended for production use and does not yet include the full set of functional, security, or integration features required for a live deployment.
 
 The current release provides only basic functionality, with several key features to be introduced in future versions, including:
- - Support for batch issuing
- - App and device verification based on Google Play Integrity API and Apple App Attestation
- - Additional issuance methods beyond the currently implemented eID based method. 
+- Support for batch issuing
+- App and device verification based on Google Play Integrity API and Apple App Attestation
+- Additional issuance methods beyond the currently implemented eID-based method
 
 These planned features align with the requirements and methods described in the Age Verification Profile.
 
 This version should be considered a foundational prototype to support early testing, feedback, and integration discussions.
-- The initial development release may be changed substantially over time and might introduce new features but also may change or remove existing ones, potentially breaking compatibility with your existing code.
-- The initial development release may contain errors or design flaws and other problems that could cause system or other failures and data loss.
+
+**Important limitations:**
+- The initial development release may be changed substantially over time and might introduce new features, change, or remove existing ones, potentially breaking compatibility with your existing code.
+- The initial development release may contain errors, design flaws, or other problems that could cause system or other failures and data loss.
 - The initial development release has reduced security, privacy, availability, and reliability standards relative to future releases. This could make the software slower, less reliable, or more vulnerable to attacks than mature software.
 - The initial development release is not yet comprehensively documented.
 - Users of the software must perform sufficient engineering and additional testing to properly evaluate their application and determine whether any of the open-sourced components are suitable for use in that application.
 - We strongly recommend not putting this version of the software into production use.
-- Only the latest version of the software will be supported
+- Only the latest version of the software will be supported.
 
 ## Development
 
@@ -62,126 +64,139 @@ This version should be considered a foundational prototype to support early test
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/en): Install the latest version of Node.js, which provides the runtime environment and npm
-- [npm](https://www.npmjs.com): Used to manage project dependencies, including TypeScript itself
-- [Docker](https://www.docker.com)
-- An installation of the [EUDI Verifier Endpoint](https://github.com/eu-digital-identity-wallet/eudi-srv-web-verifier-endpoint-23220-4-kt)
-- Authenticate to [Github Packages](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry)
+- [Node.js](https://nodejs.org/en): Install the latest version of Node.js, which provides the runtime environment and npm.
+- [npm](https://www.npmjs.com): Used to manage project dependencies, including TypeScript itself.
+- [Docker](https://www.docker.com): Required for containerized builds and deployments.
+- An installation of the [EUDI Verifier Endpoint](https://github.com/eu-digital-identity-wallet/eudi-srv-web-verifier-endpoint-23220-4-kt).
+- Authenticate to [GitHub Packages](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry).
 
-#### Authenticating in to GitHub Packages
+#### Authenticating into GitHub Packages
 
-As some of the required libraries (and/or versions are pinned/available only from GitHub Packages) You need to authenticate
-to [GitHub Packages](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry)
-The following steps need to be followed
+As some of the required libraries (and/or versions are pinned/available only from GitHub Packages), you need to authenticate to [GitHub Packages](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry). The following steps need to be followed:
 
-- Create [PAT](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) with scopes:
-  - `read:packages` for downloading packages
+- Create a [PAT](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) with the following scope:
+  - `read:packages` for downloading packages.
 
 ##### GitHub Docker Registry
 
-- Run `docker login docker.pkg.github.com/eu-age-verification` before running further docker commands.
-  - Use your GitHub username as username
-  - Use the generated PAT as password
-  
+- Run `docker login docker.pkg.github.com/eu-age-verification` before running further Docker commands:
+  - Use your GitHub username.
+  - Use the generated PAT as the password.
+
 ### Build
 
-Whether you cloned or downloaded the 'zipped' sources you will either find the sources in the chosen checkout-directory or get a zip file with the source code, which you can expand to a folder of your choice.
+Whether you cloned or downloaded the 'zipped' sources, you will find the sources in the chosen checkout directory. Alternatively, you can expand the zip file to a folder of your choice.
 
-In either case open a terminal pointing to the directory you put the sources in. The local build process is described afterwards depending on the way you choose.
+In either case, open a terminal pointing to the directory where you placed the sources. The local build process is described below, depending on the method you choose.
 
 #### Build the verifier from a local directory
-Building this project is done with vite.  
+Building this project is done with Vite.  
 
-**1. Clone the repository from GitHub with:** 
+**1. Clone the repository from GitHub:**
 ```shell
+# Replace <your-repository-url> with the actual repository URL
+# Replace <your-project-directory> with the desired directory name
+
 git clone <your-repository-url>
 cd <your-project-directory>
 ```
 
-**2. Copy Environment Configuration**
+**2. Copy the Environment Configuration:**
 ```shell
 cp .env.example .env
 ```
 
-**3. Configure Backend URL**
-  * Open the newly created .env file in a text editor.
-  * Set the URL for your Verifier backend by updating the relevant variable (VITE_VERIFIER_BASE_URL=http://your-backend-url).
+**3. Configure the Backend URL:**
+  * Open the newly created `.env` file in a text editor (e.g., VS Code, Nano).
+  * Update the `VITE_VERIFIER_BASE_URL` variable with the URL of your Verifier backend:
+    ```
+    VITE_VERIFIER_BASE_URL=http://your-backend-url
+    ```
 
-**4. Set npm to Use Legacy Peer Dependencies**
-  * Configure npm to use legacy peer dependency resolution:
-```shell
-npm config set legacy-peer-deps true
-```
-* This avoids installation errors due to peer dependency conflicts.
+**4. Set npm to Use Legacy Peer Dependencies:**
+  * Configure npm to resolve peer dependency conflicts:
+    ```shell
+    npm config set legacy-peer-deps true
+    ```
 
-**5. Install Dependencies**
+**5. Install Dependencies:**
   * Install all required dependencies:
-```shell
-npm install
-```
- * Because you set legacy-peer-deps to true, npm will ignore peer dependency conflicts during installation.
+    ```shell
+    npm install
+    ```
+  * Setting `legacy-peer-deps` ensures npm ignores peer dependency conflicts during installation.
 
-**6. Start the Application**
- + Run the development server:
- ```shell
-npm run dev
-```
-**7. Access the Application**
-  * Open your browser and navigate to http://localhost:5173.
+**6. Start the Application:**
+  * Run the development server:
+    ```shell
+    npm run dev
+    ```
+
+**7. Access the Application:**
+  * Open your browser and navigate to `http://localhost:5173`.
   * You should see the Verifier web application running locally.
 
-*Note:*
-* If you encounter any issues with dependencies, ensure that your Node.js and npm versions are compatible with the project requirements.
-* The backend service must be running and accessible at the URL you specified in the .env file.
+**Note:**
+- Ensure your Node.js and npm versions are compatible with the project requirements.
+- The backend service must be running and accessible at the URL specified in the `.env` file.
 
+### Run with Docker
 
+If you prefer to use Docker, follow these steps:
 
-#### Run with docker
-* Perform build as described above
-* Run the following command from the project root folder
+**1. Build the Docker Image:**
+  * Run the following command from the project root folder:
+    ```shell
+    docker build -t <image-name>:<tag> .
+    ```
+  * Replace `<image-name>` with a name for your image.
+  * `<tag>` is optional (e.g., `latest`). If omitted, it defaults to `latest`.
+  * The dot `.` at the end specifies that the Dockerfile is in the current directory.
 
-```shell
-docker build -t <image-name>:<tag> .
-```
-* Replace &lt;image-name&gt; with a name for your image.
-* &lt;tag&gt; is optional (e.g., latest). If omitted, it defaults to latest.
-* The dot . at the end specifies that the Dockerfile is in the current directory.
-* Example: 
-```shell
-docker build -t av-verifier-ui:latest .
-```
-* Start a container using:
-```shell
-docker run -d -p 5173:5173 av-verifier-ui:latest
-```
-* -d runs the container in detached mode (in the background).
-* -p 5173:5173 maps port 5173 of the container to port 5173 on your host (adjust the port if your app uses a different one).
+  **Example:**
+  ```shell
+  docker build -t av-verifier-ui:latest .
+  ```
 
-Now your Docker image is built and you can run a container from it! After all containers have started, you will be able to reach the service on your [local machine](http://localhost:5173) under port 5173.
+**2. Start a Docker Container:**
+  * Run the following command to start the container:
+    ```shell
+    docker run -d -p 5173:5173 av-verifier-ui:latest
+    ```
+  * `-d` runs the container in detached mode (in the background).
+  * `-p 5173:5173` maps port 5173 of the container to port 5173 on your host (adjust the port if your app uses a different one).
 
-## Documentation  
+**3. Access the Application:**
+  * After the container starts, open your browser and navigate to `http://localhost:5173`.
+  * The Verifier web application should now be accessible.
 
-[Age Verification Solution Technical Specification](https://github.com/eu-digital-identity-wallet/av-doc-technical-specification)
+**Note:**
+- Ensure Docker is installed and running on your system.
+- Verify that no other application is using port 5173 on your host machine.
 
-## Support and feedback
+## Documentation
 
-The following channels are available for discussions, feedback, and support requests:
+For detailed technical specifications and further information, refer to the [Age Verification Solution Technical Specification](https://github.com/eu-digital-identity-wallet/av-doc-technical-specification).
 
-| Type                     | Channel                                                |
-| ------------------------ | ------------------------------------------------------ |
-| **Issues**    | <a href="/../../issues" title="Open Issues"><img src="https://img.shields.io/github/issues/eu-digital-identity-wallet/av-verifier-ui?style=flat"></a>  |
-| **Other requests**    | <a href="mailto:opensource@telekom.de" title="Email AVS Team"><img src="https://img.shields.io/badge/email-AVS%20team-green?logo=mail.ru&style=flat-square&logoColor=white"></a>   |
+## Support and Feedback
+
+We welcome discussions, feedback, and support requests through the following channels:
+
+| Type              | Channel                                                                 |
+|-------------------|-------------------------------------------------------------------------|
+| **Issues**        | <a href="/../../issues" title="Open Issues"><img src="https://img.shields.io/github/issues/eu-digital-identity-wallet/av-verifier-ui?style=flat"></a> |
+| **Other Requests**| <a href="mailto:opensource@telekom.de" title="Email AVS Team"><img src="https://img.shields.io/badge/email-AVS%20team-green?logo=mail.ru&style=flat-square&logoColor=white"></a> |
 
 ## Code of Conduct
 
-This project has adopted the [Contributor Covenant](https://www.contributor-covenant.org/) in version 2.1 as our code of conduct. Please see the details in our [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). All contributors must abide by the code of conduct.
+This project adheres to the [Contributor Covenant](https://www.contributor-covenant.org/) version 2.1 as its code of conduct. Please review the details in our [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). All contributors are expected to abide by the code of conduct at all times.
 
-By participating in this project, you agree to abide by its [Code of Conduct](./CODE_OF_CONDUCT.md) at all times.
+By participating in this project, you agree to adhere to its [Code of Conduct](./CODE_OF_CONDUCT.md).
 
 ## Licensing
 
-Copyright (C) 2025 European Commission, Scytales, T-Systems International GmbH and all other contributors.
+Copyright (C) 2025 European Commission, Scytales, T-Systems International GmbH, and all other contributors.
 
-This project follows the [REUSE standard for software licensing](https://reuse.software/). Each file contains copyright and license information, and license texts can be found in the [./LICENSES](./LICENSES) folder. For more information visit https://reuse.software/. You can find a guide for developers at https://telekom.github.io/reuse-template/.  
+This project complies with the [REUSE standard for software licensing](https://reuse.software/). Each file includes copyright and license information, and license texts are available in the [./LICENSES](./LICENSES) folder. For more details, visit [REUSE Software](https://reuse.software/). A developer guide is also available at [REUSE Template Guide](https://telekom.github.io/reuse-template/).
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the LICENSES folder.
