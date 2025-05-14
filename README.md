@@ -18,11 +18,11 @@ SPDX-License-Identifier: Apache-2.0
 
 <p align="center">
   <a href="#about">About</a> •
+  <a href="#disclaimer">Disclaimer</a> •
   <a href="#development">Development</a> •
   <a href="#documentation">Documentation</a> •
   <a href="#support-and-feedback">Support</a> •
-  <a href="#how-to-contribute">Contribute</a> •
-  <a href="#contributors">Contributors</a> •
+  <a href="#code-of-conduct">Code of Conduct</a> •
   <a href="#licensing">Licensing</a>
 </p>
 
@@ -35,6 +35,26 @@ The Verifier Service consists of two components: the frontend (UI) and the actua
 This frontend is a minimal version of a verifier frontend, designed to make it easier for relying parties and to provide a simple illustration of how to use the verifier service.
 
 A more comprehensive and illustrative use case for a verifier can be found in the repository [StarFilm](https://github.com/eu-digital-identity-wallet/av-verifier-frontend-starfilm), which is based on a fictional cinema portal.
+
+## Disclaimer
+
+This is an initial version of the software, developed solely for the purpose of demonstrating the business flow of the solution. It is not intended for production use, and does not yet include the full set of functional, security, or integration features required for a live deployment.
+
+The current release provides only basic functionality, with several key features to be introduced in future versions, including:
+ - Support for batch issuing
+ - App and device verification based on Google Play Integrity API and Apple App Attestation
+ - Additional issuance methods beyond the currently implemented eID based method. 
+
+These planned features align with the requirements and methods described in the Age Verification Profile.
+
+This version should be considered a foundational prototype to support early testing, feedback, and integration discussions.
+- The initial development release may be changed substantially over time and might introduce new features but also may change or remove existing ones, potentially breaking compatibility with your existing code.
+- The initial development release may contain errors or design flaws and other problems that could cause system or other failures and data loss.
+- The initial development release has reduced security, privacy, availability, and reliability standards relative to future releases. This could make the software slower, less reliable, or more vulnerable to attacks than mature software.
+- The initial development release is not yet comprehensively documented.
+- Users of the software must perform sufficient engineering and additional testing to properly evaluate their application and determine whether any of the open-sourced components are suitable for use in that application.
+- We strongly recommend not putting this version of the software into production use.
+- Only the latest version of the software will be supported
 
 ## Development
 
@@ -152,19 +172,11 @@ The following channels are available for discussions, feedback, and support requ
 | **Issues**    | <a href="/../../issues" title="Open Issues"><img src="https://img.shields.io/github/issues/eu-digital-identity-wallet/av-verifier-ui?style=flat"></a>  |
 | **Other requests**    | <a href="mailto:opensource@telekom.de" title="Email AVS Team"><img src="https://img.shields.io/badge/email-AVS%20team-green?logo=mail.ru&style=flat-square&logoColor=white"></a>   |
 
-## How to contribute  
-
-Contribution and feedback is encouraged and always welcome. For more information about how to contribute, the project structure, as well as additional contribution information, see our [Contribution Guidelines](./CONTRIBUTING.md). 
-
 ## Code of Conduct
 
 This project has adopted the [Contributor Covenant](https://www.contributor-covenant.org/) in version 2.1 as our code of conduct. Please see the details in our [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). All contributors must abide by the code of conduct.
 
 By participating in this project, you agree to abide by its [Code of Conduct](./CODE_OF_CONDUCT.md) at all times.
-
-## Contributors  
-
-Our commitment to open source means that we are enabling -in fact encouraging- all interested parties to contribute and become part of its developer community.
 
 ## Licensing
 
