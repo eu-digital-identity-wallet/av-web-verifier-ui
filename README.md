@@ -13,7 +13,8 @@ SPDX-License-Identifier: Apache-2.0
 <p align="center">
     <a href="/../../commits/" title="Last Commit"><img src="https://img.shields.io/github/last-commit/eu-digital-identity-wallet/av-verifier-ui?style=flat"></a>
     <a href="/../../issues" title="Open Issues"><img src="https://img.shields.io/github/issues/eu-digital-identity-wallet/av-verifier-ui?style=flat"></a>
-    <a href="./LICENSE" title="License"><img src="https://img.shields.io/badge/License-Apache%202.0-green.svg?style=flat"></a>
+    <a href="./LICENSES" title="License"><img src="https://img.shields.io/badge/License-Apache%202.0-green.svg?style=flat"></a>
+    <a href="../../actions/workflows/license_check.yaml" title="REUSE"><img src="https://github.com/T-Scy/av-verifier-ui/actions/workflows/license_check.yaml/badge.svg"></a>
 </p>
 
 <p align="center">
