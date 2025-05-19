@@ -189,16 +189,6 @@ By participating in this project, you agree to adhere to its [Code of Conduct](.
 
 ## License
 
-### Third-party component licenses
-
-* [Angular CLI](https://github.com/angular/angular-cli)
-* [cbor](https://github.com/hildjj/node-cbor)
-* [jwt-decode](https://github.com/auth0/jwt-decode#readme)
-* [rxjs](https://github.com/reactivex/rxjs)
-* [qrcodejs](https://github.com/llyys/qrcodejs)
-
-### License details
-
 Copyright (c) 2025 European Commission
 
 Licensed under the Apache License, Version 2.0 (the "License");
