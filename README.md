@@ -11,20 +11,13 @@ SPDX-License-Identifier: Apache-2.0
 </h1>
 
 <p align="center">
-    <a href="/../../commits/" title="Last Commit"><img src="https://img.shields.io/github/last-commit/eu-digital-identity-wallet/av-verifier-ui?style=flat"></a>
-    <a href="/../../issues" title="Open Issues"><img src="https://img.shields.io/github/issues/eu-digital-identity-wallet/av-verifier-ui?style=flat"></a>
-    <a href="./LICENSES" title="License"><img src="https://img.shields.io/badge/License-Apache%202.0-green.svg?style=flat"></a>
-    <a href="../../actions/workflows/license_check.yaml" title="REUSE"><img src="https://github.com/T-Scy/av-verifier-ui/actions/workflows/license_check.yaml/badge.svg"></a>
-</p>
-
-<p align="center">
   <a href="#about">About</a> •
   <a href="#disclaimer">Disclaimer</a> •
   <a href="#development">Development</a> •
   <a href="#documentation">Documentation</a> •
   <a href="#support-and-feedback">Support</a> •
   <a href="#code-of-conduct">Code of Conduct</a> •
-  <a href="#licensing">Licensing</a>
+  <a href="#license">Licensing</a>
 </p>
 
 ## About
@@ -194,10 +187,28 @@ This project adheres to the [Contributor Covenant](https://www.contributor-coven
 
 By participating in this project, you agree to adhere to its [Code of Conduct](./CODE_OF_CONDUCT.md).
 
-## Licensing
+## License
 
-Copyright (C) 2025 European Commission, Scytales, T-Systems International GmbH, and all other contributors.
+### Third-party component licenses
 
-This project complies with the [REUSE standard for software licensing](https://reuse.software/). Each file includes copyright and license information, and license texts are available in the [./LICENSES](./LICENSES) folder. For more details, visit [REUSE Software](https://reuse.software/). A developer guide is also available at [REUSE Template Guide](https://telekom.github.io/reuse-template/).
+* [Angular CLI](https://github.com/angular/angular-cli)
+* [cbor](https://github.com/hildjj/node-cbor)
+* [jwt-decode](https://github.com/auth0/jwt-decode#readme)
+* [rxjs](https://github.com/reactivex/rxjs)
+* [qrcodejs](https://github.com/llyys/qrcodejs)
 
-Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the LICENSES folder.
+### License details
+
+Copyright (c) 2025 European Commission
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
