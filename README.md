@@ -178,7 +178,7 @@ We welcome discussions, feedback, and support requests through the following cha
 
 | Type              | Channel                                                                 |
 |-------------------|-------------------------------------------------------------------------|
-| **Issues**        | <a href="/../../issues" title="Open Issues"><img src="https://img.shields.io/github/issues/eu-digital-identity-wallet/av-verifier-ui?style=flat"></a> |
+| **Issues**        | <a href="/../../issues" title="Open Issues"><img src="https://img.shields.io/github/issues/eu-digital-identity-wallet/av-web-verifier-ui?style=flat"></a> |
 | **Other Requests**| <a href="mailto:av-tscy@scytales.com" title="Email AVS Team"><img src="https://img.shields.io/badge/email-AVS%20team-green?logo=mail.ru&style=flat-square&logoColor=white"></a> |
 
 ## Code of Conduct
