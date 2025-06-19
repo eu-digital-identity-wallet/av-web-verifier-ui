@@ -9,9 +9,9 @@ export default function Footer() {
         This verifier is compatible with{' '}
         <a
           className="text-indigo-800 underline"
-          href="https://openid.net/specs/openid-4-verifiable-presentations-1_0-23.html"
+          href="https://openid.net/specs/openid-4-verifiable-presentations-1_0-24.html"
         >
-          OpenID4VP Draft 23
+          OpenID4VP Draft 24
         </a>
       </p>
     </div>
