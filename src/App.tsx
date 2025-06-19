@@ -93,8 +93,8 @@ function App() {
         <VerificationTexts verifiedData={verifiedData} />
         {!query.isLoading && state.status !== 'success' ? (
           <div className="h-1/2">
-            <div className="flex justify-center h-full mt-12">
-              <QrCode data={query.data} />
+            <div className="flex justify-center h-full mt-12" style={{ flexDirection: 'column' }}>
+              <QrCode data={query.data.request} />
             </div>
             <div className="flex justify-end">
               <Button onClick={() => setIsConfiguring(true)} text="configure" />
