@@ -35,7 +35,7 @@ A more comprehensive and illustrative use case for a verifier can be found in th
 This is an initial version of the software, developed solely for the purpose of demonstrating the business flow of the solution. It is not intended for production use and does not yet include the full set of functional, security, or integration features required for a live deployment.
 
 The current release provides only basic functionality, with several key features to be introduced in future versions, including:
-- Support for batch issuing
+
 - App and device verification based on Google Play Integrity API and Apple App Attestation
 - Additional issuance methods beyond the currently implemented eID-based method
 
@@ -56,117 +56,13 @@ This version should be considered a foundational prototype to support early test
 
 **Note:** The verifier service needs a configured connection to a compatible verifier backend service. There is no standalone version available.
 
-### Prerequisites
+For detailed setup and configuration instructions, please refer to the [Installation and Configuration Guide](./backend-configuration.md).
 
-- [Node.js](https://nodejs.org/en): Install the latest version of Node.js, which provides the runtime environment and npm.
-- [npm](https://www.npmjs.com): Used to manage project dependencies, including TypeScript itself.
-- [Docker](https://www.docker.com): Required for containerized builds and deployments.
-- An installation of the [EUDI Verifier Endpoint](https://github.com/eu-digital-identity-wallet/eudi-srv-web-verifier-endpoint-23220-4-kt).
-- Authenticate to [GitHub Packages](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry).
+Once the backend is up and running, it can be tested using the age verification apps for mobile platforms:
 
-#### Authenticating into GitHub Packages
+- [Android AV Wallet App](https://github.com/eu-digital-identity-wallet/av-app-android-wallet-ui)
+- [iOS AV Wallet App](https://github.com/eu-digital-identity-wallet/av-app-ios-wallet-ui)
 
-As some of the required libraries (and/or versions are pinned/available only from GitHub Packages), you need to authenticate to [GitHub Packages](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry). The following steps need to be followed:
-
-- Create a [PAT](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) with the following scope:
-  - `read:packages` for downloading packages.
-
-##### GitHub Docker Registry
-
-- Run `docker login docker.pkg.github.com/eu-age-verification` before running further Docker commands:
-  - Use your GitHub username.
-  - Use the generated PAT as the password.
-
-### Build
-
-Whether you cloned or downloaded the 'zipped' sources, you will find the sources in the chosen checkout directory. Alternatively, you can expand the zip file to a folder of your choice.
-
-In either case, open a terminal pointing to the directory where you placed the sources. The local build process is described below, depending on the method you choose.
-
-#### Build the verifier from a local directory
-Building this project is done with Vite.  
-
-**1. Clone the repository from GitHub:**
-```shell
-# Replace <your-repository-url> with the actual repository URL
-# Replace <your-project-directory> with the desired directory name
-
-git clone <your-repository-url>
-cd <your-project-directory>
-```
-
-**2. Copy the Environment Configuration:**
-```shell
-cp .env.example .env
-```
-
-**3. Configure the Backend URL:**
-  * Open the newly created `.env` file in a text editor (e.g., VS Code, Nano).
-  * Update the `VITE_VERIFIER_BASE_URL` variable with the URL of your Verifier backend:
-    ```
-    VITE_VERIFIER_BASE_URL=http://your-backend-url
-    ```
-
-**4. Set npm to Use Legacy Peer Dependencies:**
-  * Configure npm to resolve peer dependency conflicts:
-    ```shell
-    npm config set legacy-peer-deps true
-    ```
-
-**5. Install Dependencies:**
-  * Install all required dependencies:
-    ```shell
-    npm install
-    ```
-  * Setting `legacy-peer-deps` ensures npm ignores peer dependency conflicts during installation.
-
-**6. Start the Application:**
-  * Run the development server:
-    ```shell
-    npm run dev
-    ```
-
-**7. Access the Application:**
-  * Open your browser and navigate to `http://localhost:5173`.
-  * You should see the Verifier web application running locally.
-
-**Note:**
-- Ensure your Node.js and npm versions are compatible with the project requirements.
-- The backend service must be running and accessible at the URL specified in the `.env` file.
-
-### Run with Docker
-
-If you prefer to use Docker, follow these steps:
-
-**1. Build the Docker Image:**
-  * Run the following command from the project root folder:
-    ```shell
-    docker build -t <image-name>:<tag> .
-    ```
-  * Replace `<image-name>` with a name for your image.
-  * `<tag>` is optional (e.g., `latest`). If omitted, it defaults to `latest`.
-  * The dot `.` at the end specifies that the Dockerfile is in the current directory.
-
-  **Example:**
-  ```shell
-  docker build -t av-verifier-ui:latest .
-  ```
-
-**2. Start a Docker Container:**
-  * Run the following command to start the container:
-    ```shell
-    docker run -d -p 5173:5173 av-verifier-ui:latest
-    ```
-  * `-d` runs the container in detached mode (in the background).
-  * `-p 5173:5173` maps port 5173 of the container to port 5173 on your host (adjust the port if your app uses a different one).
-
-**3. Access the Application:**
-  * After the container starts, open your browser and navigate to `http://localhost:5173`.
-  * The Verifier web application should now be accessible.
-
-**Note:**
-- Ensure Docker is installed and running on your system.
-- Verify that no other application is using port 5173 on your host machine.
 
 ## Documentation
 
