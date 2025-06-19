@@ -32,6 +32,10 @@ export async function CreatePresentationRequest(fields: PresentationFields[]) {
           },
         ],
       },
+      dcql_query: null,
+      jar_mode: "by_value",
+      response_mode: "direct_post",
+      presentation_definition_mode: "by_reference",
       nonce: uuidv4(),
     }),
   });
