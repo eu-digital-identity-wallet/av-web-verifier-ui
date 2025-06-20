@@ -87,44 +87,49 @@ function App() {
   }, [state.data]);
 
   return (
-    <div className="flex justify-center h-screen">
-      <div className="w-1/2 mt-8">
+    <div className="flex justify-center min-h-screen">
+      <div className="w-full sm:w-1/2 flex flex-col p-4">
         <Header />
-        <VerificationTexts verifiedData={verifiedData} />
-        {!query.isLoading && state.status !== 'success' ? (
-          <div className="h-1/2">
-            <div
-              className="flex justify-center h-full mt-12"
-              style={{ flexDirection: 'column' }}
-            >
-              <QrCode data={query.data.request} />
-            </div>
-            <div className="flex justify-end">
-              <Button onClick={() => setIsConfiguring(true)} text="configure" />
-              <ConfigureDialog
-                isOpen={isConfiguring}
-                setIsOpen={setIsConfiguring}
-                updateQuery={updateQuery}
-              />
-            </div>
-          </div>
-        ) : (
-          <div className="mx-4 flex flex-row gap-4 mt-4">
-            {state.status === 'success' && (
-              <>
-                <Button onClick={() => setIsOpen(true)} text="Show details" />
-                <Button onClick={() => query.refetch()} text="New Request" />
-                <DetailDialog
-                  isOpen={isOpen}
-                  setIsOpen={setIsOpen}
-                  verifiedData={verifiedData}
+        <main className="flex-grow flex flex-col">
+          <VerificationTexts verifiedData={verifiedData} />
+          {!query.isLoading && state.status !== 'success' ? (
+            <div className="mt-8">
+              <div
+                className="flex justify-center"
+                style={{ flexDirection: 'column' }}
+              >
+                {query.data?.request && <QrCode data={query.data.request} />}
+              </div>
+              <div className="flex justify-center sm:justify-end mt-4">
+                <Button
+                  onClick={() => setIsConfiguring(true)}
+                  text="configure"
                 />
-              </>
-            )}
-          </div>
-        )}
+                <ConfigureDialog
+                  isOpen={isConfiguring}
+                  setIsOpen={setIsConfiguring}
+                  updateQuery={updateQuery}
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="mx-4 flex flex-row gap-4 mt-4">
+              {state.status === 'success' && (
+                <>
+                  <Button onClick={() => setIsOpen(true)} text="Show details" />
+                  <Button onClick={() => query.refetch()} text="New Request" />
+                  <DetailDialog
+                    isOpen={isOpen}
+                    setIsOpen={setIsOpen}
+                    verifiedData={verifiedData}
+                  />
+                </>
+              )}
+            </div>
+          )}
+        </main>
+        <Footer />
       </div>
-      <Footer />
     </div>
   );
 }
