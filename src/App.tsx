@@ -32,7 +32,7 @@ function App() {
     PresentationFields[]
   >([
     {
-      path: ["$['eu.europa.ec.agev10n']['age_over_18']"],
+      path: ["$['eu.europa.ec.av.1']['age_over_18']"],
       intent_to_retain: false,
     },
   ]);
@@ -55,7 +55,7 @@ function App() {
     const newPresentationFields: PresentationFields[] = Object.keys(fields)
       .filter((key) => fields[key as keyof Fields] === true)
       .map((key) => ({
-        path: [`$['eu.europa.ec.agev10n']['${key}']`],
+        path: [`$['eu.europa.ec.av.1']['${key}']`],
         intent_to_retain: false,
       }));
     setPresentationFields(newPresentationFields);
@@ -93,7 +93,10 @@ function App() {
         <VerificationTexts verifiedData={verifiedData} />
         {!query.isLoading && state.status !== 'success' ? (
           <div className="h-1/2">
-            <div className="flex justify-center h-full mt-12" style={{ flexDirection: 'column' }}>
+            <div
+              className="flex justify-center h-full mt-12"
+              style={{ flexDirection: 'column' }}
+            >
               <QrCode data={query.data.request} />
             </div>
             <div className="flex justify-end">

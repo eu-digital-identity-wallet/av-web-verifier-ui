@@ -43,11 +43,11 @@ export default function ConfigureDialog({
 
   const fieldLabels: { key: keyof Fields; label: string }[] = [
     { key: 'age_over_18', label: 'Age over 18' },
-    { key: 'issue_date', label: 'Issuance date' },
+    /* { key: 'issue_date', label: 'Issuance date' },
     { key: 'expiry_date', label: 'Expiry date' },
     { key: 'issuing_authority', label: 'Issuing authority' },
     { key: 'issuing_jurisdiction', label: 'Issuing jurisdiction' },
-    { key: 'issuing_country', label: 'Issuing country' },
+    { key: 'issuing_country', label: 'Issuing country' },*/
   ];
 
   return (

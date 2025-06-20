@@ -19,7 +19,7 @@ export async function CreatePresentationRequest(fields: PresentationFields[]) {
         id: uuidv4(),
         input_descriptors: [
           {
-            id: 'eu.europa.ec.agev10n',
+            id: 'eu.europa.ec.av.1',
             format: {
               mso_mdoc: {
                 alg: ['ES256', 'ES384', 'ES512', 'EdDSA'],
@@ -33,9 +33,9 @@ export async function CreatePresentationRequest(fields: PresentationFields[]) {
         ],
       },
       dcql_query: null,
-      jar_mode: "by_value",
-      response_mode: "direct_post",
-      presentation_definition_mode: "by_reference",
+      jar_mode: 'by_value',
+      response_mode: 'direct_post',
+      presentation_definition_mode: 'by_reference',
       nonce: uuidv4(),
     }),
   });

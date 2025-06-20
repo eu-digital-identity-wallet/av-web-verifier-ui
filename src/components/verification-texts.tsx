@@ -18,7 +18,7 @@ export default function VerificationTexts({
       <p className="mt-2">
         {verifiedData
           ? verifiedData.filter(
-              (item) => item.key === 'eu.europa.ec.agev10n:age_over_18'
+              (item) => item.key === 'eu.europa.ec.av.1:age_over_18'
             )[0]?.value === 'true'
             ? 'You have successfully proven your age'
             : 'You have not been able to prove that you are over 18 years old'
