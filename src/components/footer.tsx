@@ -13,6 +13,15 @@ export default function Footer() {
         >
           EU Age Verification Profile, Version 0.3
         </a>
+        {' | '}
+        <a
+          className="text-indigo-800 underline"
+          href="https://github.com/eu-digital-identity-wallet/av-web-verifier-ui"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          View on GitHub
+        </a>
       </p>
     </div>
   );
