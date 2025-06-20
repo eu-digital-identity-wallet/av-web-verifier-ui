@@ -36,11 +36,23 @@ export type Errored = {
 
 export type Fields = {
   age_over_18: boolean;
-  issue_date: boolean;
+  age_over_13: boolean;
+  age_over_15: boolean;
+  age_over_16: boolean;
+  age_over_21: boolean;
+  age_over_23: boolean;
+  age_over_25: boolean;
+  age_over_27: boolean;
+  age_over_28: boolean;
+  age_over_40: boolean;
+  age_over_60: boolean;
+  age_over_65: boolean;
+  age_over_67: boolean;
+  /* issue_date: boolean;
   expiry_date: boolean;
   issuing_authority: boolean;
   issuing_jurisdiction: boolean;
-  issuing_country: boolean;
+  issuing_country: boolean;*/
 };
 
 export type PresentationFields = {

@@ -27,11 +27,23 @@ export default function ConfigureDialog({
 }) {
   const [fields, setFields] = useState<Fields>({
     age_over_18: true,
-    issue_date: false,
+    age_over_13: false,
+    age_over_15: false,
+    age_over_16: false,
+    age_over_21: false,
+    age_over_23: false,
+    age_over_25: false,
+    age_over_27: false,
+    age_over_28: false,
+    age_over_40: false,
+    age_over_60: false,
+    age_over_65: false,
+    age_over_67: false,
+    /* issue_date: false,
     expiry_date: false,
     issuing_authority: false,
     issuing_jurisdiction: false,
-    issuing_country: false,
+    issuing_country: false,*/
   });
 
   const toggleField = (field: keyof typeof fields) => {
@@ -43,6 +55,18 @@ export default function ConfigureDialog({
 
   const fieldLabels: { key: keyof Fields; label: string }[] = [
     { key: 'age_over_18', label: 'Age over 18' },
+    { key: 'age_over_13', label: 'Age over 13' },
+    { key: 'age_over_15', label: 'Age over 15' },
+    { key: 'age_over_16', label: 'Age over 16' },
+    { key: 'age_over_21', label: 'Age over 21' },
+    { key: 'age_over_23', label: 'Age over 23' },
+    { key: 'age_over_25', label: 'Age over 25' },
+    { key: 'age_over_27', label: 'Age over 27' },
+    { key: 'age_over_28', label: 'Age over 28' },
+    { key: 'age_over_40', label: 'Age over 40' },
+    { key: 'age_over_60', label: 'Age over 60' },
+    { key: 'age_over_65', label: 'Age over 65' },
+    { key: 'age_over_67', label: 'Age over 67' },
     /* { key: 'issue_date', label: 'Issuance date' },
     { key: 'expiry_date', label: 'Expiry date' },
     { key: 'issuing_authority', label: 'Issuing authority' },
