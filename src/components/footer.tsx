@@ -6,12 +6,12 @@ export default function Footer() {
   return (
     <div className="fixed bottom-0 left-0 w-full border-t border-t-gray-600 bg-white">
       <p className="py-2 text-center text-xs font-medium text-gray-600">
-        This verifier is compatible with{' '}
+        This verifier is compatible with the{' '}
         <a
           className="text-indigo-800 underline"
-          href="https://openid.net/specs/openid-4-verifiable-presentations-1_0-24.html"
+          href="https://docs.ageverification.dev/Technical%20Specification/annexes/annex-4/annex-4-av-profile/"
         >
-          OpenID4VP Draft 24
+          EU Age Verification Profile, Version 0.3
         </a>
       </p>
     </div>
