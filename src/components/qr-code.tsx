@@ -37,7 +37,7 @@ function parseJwtAndCreateUri(token:any) {
     );
     var parsed = JSON.parse(jsonPayload);
 
-    var request_new = "avsp"
+    var request_new = "av"
     + "://" 
     + "?client_id=redirect_uri:" + parsed.response_uri
     + "&response_type=" + parsed.response_type
