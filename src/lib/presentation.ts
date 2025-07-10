@@ -15,27 +15,18 @@ export async function CreatePresentationRequest(fields: PresentationFields[]) {
     },
     body: JSON.stringify({
       type: 'vp_token',
-      presentation_definition: {
-        id: uuidv4(),
-        input_descriptors: [
+      dcql_query: {
+        credentials: [
           {
-            id: 'eu.europa.ec.av.1',
-            format: {
-              mso_mdoc: {
-                alg: ['ES256', 'ES384', 'ES512', 'EdDSA'],
-              },
+            id: 'proof_of_age',
+            format: 'mso_mdoc',
+            meta: {
+              doctype_value: 'eu.europa.ec.av.1',
             },
-            constraints: {
-              limit_disclosure: 'required',
-              fields: [...fields],
-            },
+            claims: [...fields],
           },
         ],
       },
-      dcql_query: null,
-      jar_mode: 'by_value',
-      response_mode: 'direct_post',
-      presentation_definition_mode: 'by_reference',
       nonce: uuidv4(),
     }),
   });

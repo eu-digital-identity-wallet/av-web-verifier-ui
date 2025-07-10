@@ -32,8 +32,7 @@ function App() {
     PresentationFields[]
   >([
     {
-      path: ["$['eu.europa.ec.av.1']['age_over_18']"],
-      intent_to_retain: false,
+      path: ['eu.europa.ec.av.1', 'age_over_18'],
     },
   ]);
 
@@ -55,17 +54,16 @@ function App() {
     const newPresentationFields: PresentationFields[] = Object.keys(fields)
       .filter((key) => fields[key as keyof Fields] === true)
       .map((key) => ({
-        path: [`$['eu.europa.ec.av.1']['${key}']`],
-        intent_to_retain: false,
+        path: ['eu.europa.ec.av.1', key],
       }));
     setPresentationFields(newPresentationFields);
     query.refetch();
   }
 
   useEffect(() => {
-    if (state.data && state.data.vp_token && state.data.vp_token[0]) {
+    if (state.data && state.data.vp_token && state.data.vp_token.proof_of_age) {
       try {
-        const decodedData = decode(state.data.vp_token[0]);
+        const decodedData = decode(state.data.vp_token.proof_of_age);
 
         if (decodedData.length > 0) {
           const firstAttestation = decodedData[0];
