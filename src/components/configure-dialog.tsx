@@ -13,7 +13,7 @@ import {
 } from '@headlessui/react';
 import Button from './ui/button';
 import { CheckIcon } from '@heroicons/react/16/solid';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Fields } from '../lib/types';
 
 export default function ConfigureDialog({
@@ -46,8 +46,16 @@ export default function ConfigureDialog({
     issuing_country: false,*/
   });
 
-  const toggleField = (field: keyof typeof fields) => {
-    setFields((prev) => ({
+  const [tempFields, setTempFields] = useState<Fields>(fields);
+
+  useEffect(() => {
+    if (isOpen) {
+      setTempFields(fields);
+    }
+  }, [isOpen, fields]);
+
+  const toggleField = (field: keyof Fields) => {
+    setTempFields((prev) => ({
       ...prev,
       [field]: !prev[field],
     }));
@@ -91,7 +99,7 @@ export default function ConfigureDialog({
             {fieldLabels.map(({ key, label }) => (
               <Field key={key} className="flex items-center gap-2">
                 <Checkbox
-                  checked={fields[key]}
+                  checked={tempFields[key]}
                   onChange={() => toggleField(key)}
                   className="group block size-4 rounded border bg-white data-[checked]:bg-blue-500 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 data-[checked]:data-[disabled]:bg-gray-500"
                 >
@@ -102,7 +110,14 @@ export default function ConfigureDialog({
             ))}
           </div>
           <div className="flex flex-row gap-4">
-            <Button text="Select" onClick={() => updateQuery(fields)} />
+            <Button
+              text="Select"
+              onClick={() => {
+                setFields(tempFields);
+                updateQuery(tempFields);
+                setIsOpen(false);
+              }}
+            />
             <Button text="Close" onClick={() => setIsOpen(false)} />
           </div>
         </DialogPanel>
