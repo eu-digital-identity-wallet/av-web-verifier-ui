@@ -21,11 +21,11 @@ export default function Header({
       </div>
       <Menu>
         <MenuButton>
-          <button aria-label="Open menu" className="cursor-pointer">
+          <div aria-label="Open menu" className="cursor-pointer">
             <span className="block w-8 h-0.5 bg-gray-700 rounded transition-all"></span>
             <span className="block w-8 h-0.5 bg-gray-700 rounded my-1 transition-all"></span>
             <span className="block w-8 h-0.5 bg-gray-700 rounded transition-all"></span>
-          </button>
+          </div>
         </MenuButton>
         <MenuItems
           anchor="bottom"
