@@ -58,3 +58,29 @@ export type Fields = {
 export type PresentationFields = {
   path: string[];
 };
+
+export type TrustInfo = {
+  issuer_in_trusted_list: boolean;
+  issuer_not_expired: boolean;
+  trusted_list_source: string;
+  valid_from: string;
+  valid_until: string;
+  validation_errors: string[];
+  is_fully_trusted: boolean;
+};
+
+export type PresentationState = {
+  vp_token: {
+    proof_of_age: string;
+  };
+  presentation_submission: {
+    id: string;
+    definition_id: string;
+    descriptor_map: Array<{
+      id: string;
+      format: string;
+      path: string;
+    }>;
+  };
+  trust_info: TrustInfo[];
+};

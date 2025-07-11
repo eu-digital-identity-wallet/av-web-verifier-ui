@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import { type PresentationFields } from './types';
+import { type PresentationFields, type PresentationState } from './types';
 import { v4 as uuidv4 } from 'uuid';
 
 const verifierUrl = import.meta.env.VITE_VERIFIER_BASE_URL;
@@ -37,7 +37,9 @@ export async function CreatePresentationRequest(fields: PresentationFields[]) {
   return data;
 }
 
-export async function GetPresentationState(transactionID: string) {
+export async function GetPresentationState(
+  transactionID: string
+): Promise<PresentationState> {
   const response = await fetch(
     verifierUrl + `/ui/presentations/${transactionID}`,
     {

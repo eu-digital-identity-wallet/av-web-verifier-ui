@@ -7,7 +7,7 @@ import {
   CreatePresentationRequest,
   GetPresentationState,
 } from './lib/presentation';
-import { type PresentationFields, Fields } from './lib/types';
+import { type PresentationFields, Fields, TrustInfo } from './lib/types';
 import { decode } from './lib/cbor';
 import { useEffect, useState } from 'react';
 import DetailDialog from './components/detail-dialog';
@@ -17,6 +17,7 @@ import Header from './components/header';
 import Footer from './components/footer';
 import ConfigureDialog from './components/configure-dialog';
 import VerificationTexts from './components/verification-texts';
+import TrustInfoDisplay from './components/trust-info';
 
 function App() {
   const [verifiedData, setVerifiedData] = useState<
@@ -35,6 +36,7 @@ function App() {
       path: ['eu.europa.ec.av.1', 'age_over_18'],
     },
   ]);
+  const [trustInfo, setTrustInfo] = useState<TrustInfo[] | null>(null);
 
   const query = useQuery({
     queryKey: ['proofRequest', presentationFields],
@@ -60,8 +62,18 @@ function App() {
     query.refetch();
   }
 
+  const isAgeOver18 = verifiedData
+    ? verifiedData.filter(
+        (item) => item.key === 'eu.europa.ec.av.1:age_over_18'
+      )[0]?.value === 'true'
+    : false;
+
   useEffect(() => {
     if (state.data && state.data.vp_token && state.data.vp_token.proof_of_age) {
+      if (state.data.trust_info) {
+        setTrustInfo(state.data.trust_info);
+      }
+
       try {
         const decodedData = decode(state.data.vp_token.proof_of_age);
 
@@ -81,6 +93,7 @@ function App() {
 
     return () => {
       setVerifiedData(null);
+      setTrustInfo(null);
     };
   }, [state.data]);
 
@@ -90,6 +103,11 @@ function App() {
         <Header />
         <main className="flex-grow flex flex-col">
           <VerificationTexts verifiedData={verifiedData} />
+
+          {trustInfo && verifiedData && (
+            <TrustInfoDisplay trustInfo={trustInfo} isAgeOver18={isAgeOver18} />
+          )}
+
           {!query.isLoading && state.status !== 'success' ? (
             <div className="mt-8">
               <div
