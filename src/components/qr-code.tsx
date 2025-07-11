@@ -128,18 +128,17 @@ function parseJwtAndCreateUri(token: QrCodeData): string {
 
   const request_new =
     'av' +
-    '://' +
-    '?client_id=redirect_uri:' +
-    parsed.response_uri +
-    '&response_type=' +
+    '://?' +
+    'response_type=' +
     parsed.response_type +
     '&response_mode=' +
     parsed.response_mode +
+    '&client_id=redirect_uri' +
+    encodeURIComponent(':' + parsed.response_uri) +
     '&response_uri=' +
-    parsed.response_uri +
-    '&presentation_definition_uri=' +
-    parsed.presentation_definition_uri +
-    '&dcql=null' +
+    encodeURIComponent(parsed.response_uri) +
+    '&dcql_query=' +
+    encodeURIComponent(JSON.stringify(parsed.dcql_query)) +
     '&nonce=' +
     parsed.nonce +
     '&state=' +

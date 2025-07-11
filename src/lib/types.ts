@@ -57,5 +57,4 @@ export type Fields = {
 
 export type PresentationFields = {
   path: string[];
-  intent_to_retain: boolean;
 };
