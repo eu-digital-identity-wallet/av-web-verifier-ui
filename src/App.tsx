@@ -101,11 +101,6 @@ function App() {
               >
                 {query.data?.request && <QrCode data={query.data.request} />}
               </div>
-              <ConfigureDialog
-                isOpen={isConfiguring}
-                setIsOpen={setIsConfiguring}
-                updateQuery={updateQuery}
-              />
             </div>
           ) : (
             <div className="mx-4 flex flex-row gap-4 mt-4">
@@ -122,6 +117,11 @@ function App() {
               )}
             </div>
           )}
+          <ConfigureDialog
+            isOpen={isConfiguring}
+            setIsOpen={setIsConfiguring}
+            updateQuery={updateQuery}
+          />
         </main>
         <Footer />
       </div>
