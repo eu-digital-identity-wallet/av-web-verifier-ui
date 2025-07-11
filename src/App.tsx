@@ -104,7 +104,7 @@ function App() {
           openConfigureDialog={isConfiguring}
           setOpenCofigureDialog={setIsConfiguring}
         />
-        <main className="flex-grow flex flex-col">
+        <main className="flex-grow flex flex-col px-4">
           <VerificationTexts verifiedData={verifiedData} />
 
           {trustInfo && verifiedData && (
@@ -121,7 +121,7 @@ function App() {
               </div>
             </div>
           ) : (
-            <div className="mx-4 flex flex-row gap-4 mt-4">
+            <div className="flex flex-row gap-4 mt-4">
               {state.status === 'success' && (
                 <>
                   <Button onClick={() => setIsOpen(true)} text="Show details" />
