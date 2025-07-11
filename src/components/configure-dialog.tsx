@@ -111,14 +111,14 @@ export default function ConfigureDialog({
           </div>
           <div className="flex flex-row gap-4">
             <Button
-              text="Select"
+              text="Apply"
               onClick={() => {
                 setFields(tempFields);
                 updateQuery(tempFields);
                 setIsOpen(false);
               }}
             />
-            <Button text="Close" onClick={() => setIsOpen(false)} />
+            <Button text="Cancel" onClick={() => setIsOpen(false)} />
           </div>
         </DialogPanel>
       </div>
