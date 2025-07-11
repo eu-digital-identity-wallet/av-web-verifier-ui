@@ -100,7 +100,10 @@ function App() {
   return (
     <div className="flex justify-center min-h-screen">
       <div className="w-full sm:w-1/2 flex flex-col p-4">
-        <Header />
+        <Header
+          openConfigureDialog={isConfiguring}
+          setOpenCofigureDialog={setIsConfiguring}
+        />
         <main className="flex-grow flex flex-col">
           <VerificationTexts verifiedData={verifiedData} />
 
@@ -115,17 +118,6 @@ function App() {
                 style={{ flexDirection: 'column' }}
               >
                 {query.data?.request && <QrCode data={query.data.request} />}
-              </div>
-              <div className="flex justify-center sm:justify-end mt-4">
-                <Button
-                  onClick={() => setIsConfiguring(true)}
-                  text="configure"
-                />
-                <ConfigureDialog
-                  isOpen={isConfiguring}
-                  setIsOpen={setIsConfiguring}
-                  updateQuery={updateQuery}
-                />
               </div>
             </div>
           ) : (
@@ -143,6 +135,11 @@ function App() {
               )}
             </div>
           )}
+          <ConfigureDialog
+            isOpen={isConfiguring}
+            setIsOpen={setIsConfiguring}
+            updateQuery={updateQuery}
+          />
         </main>
         <Footer />
       </div>
