@@ -9,7 +9,7 @@ export default function Footer() {
         This verifier is compatible with the{' '}
         <a
           className="text-indigo-800 underline"
-          href="https://docs.ageverification.dev/Technical%20Specification/annexes/annex-4/annex-4-av-profile/"
+          href="https://docs.ageverification.dev/Technical%20Specification/annexes/annex-A/annex-A-av-profile/"
         >
           EU Age Verification Profile, Version 0.3
         </a>
