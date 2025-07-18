@@ -28,7 +28,7 @@ The Verifier Service consists of two components: the frontend (UI) and the actua
 
 This frontend is a minimal version of a verifier frontend, designed to make it easier for relying parties and to provide a simple illustration of how to use the verifier service.
 
-A more comprehensive and illustrative use case for a verifier can be found in the repository [StarFilm](https://github.com/eu-digital-identity-wallet/av-verifier-frontend-starfilm), which is based on a fictional cinema portal.
+A more comprehensive and illustrative use case for a verifier can be found in the repository [Cinema](https://github.com/eu-digital-identity-wallet/av-verifier-frontend-cinema), which is based on a fictional cinema portal.
 
 ## Disclaimer
 
