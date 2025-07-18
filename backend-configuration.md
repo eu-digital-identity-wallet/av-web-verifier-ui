@@ -27,12 +27,10 @@ An Open API v3 specification is available at: `http://localhost:8080/public/open
 
 ## Disclaimer
 
-The released software is an initial development release version:
+The released software is the first release:
 
-- This is an early endeavor reflecting the efforts of a short timeboxed period
 - May be changed substantially over time
 - Limited in functional scope
-- May contain errors or design flaws
 - Has reduced security, privacy, availability, and reliability standards
 - **We strongly recommend not putting this version into production use**
 
@@ -59,6 +57,7 @@ cd eudi-srv-web-verifier-endpoint-23220-4-kt
 ### 2. Frontend Setup
 
 ```bash
+git clone https://github.com/eu-digital-identity-wallet/av-web-verifier-ui.git
 # Navigate to AV Verifier UI
 cd av-verifier-ui
 
