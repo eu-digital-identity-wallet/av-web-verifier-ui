@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import { type PresentationFields } from './types';
+import { type PresentationFields, type PresentationState } from './types';
 import { v4 as uuidv4 } from 'uuid';
 
 const verifierUrl = import.meta.env.VITE_VERIFIER_BASE_URL;
@@ -15,27 +15,18 @@ export async function CreatePresentationRequest(fields: PresentationFields[]) {
     },
     body: JSON.stringify({
       type: 'vp_token',
-      presentation_definition: {
-        id: uuidv4(),
-        input_descriptors: [
+      dcql_query: {
+        credentials: [
           {
-            id: 'eu.europa.ec.agev10n',
-            format: {
-              mso_mdoc: {
-                alg: ['ES256', 'ES384', 'ES512', 'EdDSA'],
-              },
+            id: 'proof_of_age',
+            format: 'mso_mdoc',
+            meta: {
+              doctype_value: 'eu.europa.ec.av.1',
             },
-            constraints: {
-              limit_disclosure: 'required',
-              fields: [...fields],
-            },
+            claims: [...fields],
           },
         ],
       },
-      dcql_query: null,
-      jar_mode: "by_value",
-      response_mode: "direct_post",
-      presentation_definition_mode: "by_reference",
       nonce: uuidv4(),
     }),
   });
@@ -46,7 +37,9 @@ export async function CreatePresentationRequest(fields: PresentationFields[]) {
   return data;
 }
 
-export async function GetPresentationState(transactionID: string) {
+export async function GetPresentationState(
+  transactionID: string
+): Promise<PresentationState> {
   const response = await fetch(
     verifierUrl + `/ui/presentations/${transactionID}`,
     {

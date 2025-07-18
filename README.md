@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0
 
 ## About
 
-The Age Verification Verifier Service is part of the Age Verification Solution Toolbox and serves as a component that can be used by member states, if necessary, to develop a national solution and build upon the building blocks of the toolbox.
+The Age Verification Verifier Service is part of the Age Verification Solution Toolbox and serves as a component that can be used by Member States, if necessary, to develop a national solution and build upon the building blocks of the toolbox.
 
 The Verifier Service consists of two components: the frontend (UI) and the actual verifier backend. This repository contains only the source code of the Age Verification Verifier Service frontend. To operate and use the verifier, it is necessary to install both the frontend and the backend.
 
@@ -32,22 +32,19 @@ A more comprehensive and illustrative use case for a verifier can be found in th
 
 ## Disclaimer
 
-This is an initial version of the software, developed solely for the purpose of demonstrating the business flow of the solution. It is not intended for production use and does not yet include the full set of functional, security, or integration features required for a live deployment.
+This is a first release of the software, developed solely for the purpose of demonstrating the business flow of the solution. It is not intended for production use and does not yet include the full set of functional, security, or integration features required for a live deployment.
 
-The current release provides only basic functionality, with several key features to be introduced in future versions, including:
-
-- App and device verification based on Google Play Integrity API and Apple App Attestation
-- Additional issuance methods beyond the currently implemented eID-based method
+The current release provides only basic functionality, with several key features to be introduced in future versions.
 
 These planned features align with the requirements and methods described in the Age Verification Profile.
 
 This version should be considered a foundational prototype to support early testing, feedback, and integration discussions.
 
 **Important limitations:**
-- The initial development release may be changed substantially over time and might introduce new features, change, or remove existing ones, potentially breaking compatibility with your existing code.
-- The initial development release may contain errors, design flaws, or other problems that could cause system or other failures and data loss.
-- The initial development release has reduced security, privacy, availability, and reliability standards relative to future releases. This could make the software slower, less reliable, or more vulnerable to attacks than mature software.
-- The initial development release is not yet comprehensively documented.
+- The release may be changed substantially over time and might introduce new features, change, or remove existing ones, potentially breaking compatibility with your existing code.
+- The release may contain errors, design flaws, or other problems that could cause system or other failures and data loss.
+- The release has reduced security, privacy, availability, and reliability standards relative to future releases. This could make the software slower, less reliable, or more vulnerable to attacks than mature software.
+- The release is not yet comprehensively documented.
 - Users of the software must perform sufficient engineering and additional testing to properly evaluate their application and determine whether any of the open-sourced components are suitable for use in that application.
 - We strongly recommend not putting this version of the software into production use.
 - Only the latest version of the software will be supported.

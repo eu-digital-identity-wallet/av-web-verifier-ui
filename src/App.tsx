@@ -7,7 +7,7 @@ import {
   CreatePresentationRequest,
   GetPresentationState,
 } from './lib/presentation';
-import { type PresentationFields, Fields } from './lib/types';
+import { type PresentationFields, Fields, TrustInfo } from './lib/types';
 import { decode } from './lib/cbor';
 import { useEffect, useState } from 'react';
 import DetailDialog from './components/detail-dialog';
@@ -17,6 +17,7 @@ import Header from './components/header';
 import Footer from './components/footer';
 import ConfigureDialog from './components/configure-dialog';
 import VerificationTexts from './components/verification-texts';
+import TrustInfoDisplay from './components/trust-info';
 
 function App() {
   const [verifiedData, setVerifiedData] = useState<
@@ -32,10 +33,10 @@ function App() {
     PresentationFields[]
   >([
     {
-      path: ["$['eu.europa.ec.agev10n']['age_over_18']"],
-      intent_to_retain: false,
+      path: ['eu.europa.ec.av.1', 'age_over_18'],
     },
   ]);
+  const [trustInfo, setTrustInfo] = useState<TrustInfo[] | null>(null);
 
   const query = useQuery({
     queryKey: ['proofRequest', presentationFields],
@@ -55,17 +56,26 @@ function App() {
     const newPresentationFields: PresentationFields[] = Object.keys(fields)
       .filter((key) => fields[key as keyof Fields] === true)
       .map((key) => ({
-        path: [`$['eu.europa.ec.agev10n']['${key}']`],
-        intent_to_retain: false,
+        path: ['eu.europa.ec.av.1', key],
       }));
     setPresentationFields(newPresentationFields);
     query.refetch();
   }
 
+  const isAgeOver18 = verifiedData
+    ? verifiedData.filter(
+        (item) => item.key === 'eu.europa.ec.av.1:age_over_18'
+      )[0]?.value === 'true'
+    : false;
+
   useEffect(() => {
-    if (state.data && state.data.vp_token && state.data.vp_token[0]) {
+    if (state.data && state.data.vp_token && state.data.vp_token.proof_of_age) {
+      if (state.data.trust_info) {
+        setTrustInfo(state.data.trust_info);
+      }
+
       try {
-        const decodedData = decode(state.data.vp_token[0]);
+        const decodedData = decode(state.data.vp_token.proof_of_age);
 
         if (decodedData.length > 0) {
           const firstAttestation = decodedData[0];
@@ -83,45 +93,56 @@ function App() {
 
     return () => {
       setVerifiedData(null);
+      setTrustInfo(null);
     };
   }, [state.data]);
 
   return (
-    <div className="flex justify-center h-screen">
-      <div className="w-1/2 mt-8">
-        <Header />
-        <VerificationTexts verifiedData={verifiedData} />
-        {!query.isLoading && state.status !== 'success' ? (
-          <div className="h-1/2">
-            <div className="flex justify-center h-full mt-12" style={{ flexDirection: 'column' }}>
-              <QrCode data={query.data.request} />
+    <div className="flex justify-center min-h-screen">
+      <div className="w-full sm:w-1/2 flex flex-col p-4">
+        <Header
+          openConfigureDialog={isConfiguring}
+          setOpenCofigureDialog={setIsConfiguring}
+        />
+        <main className="flex-grow flex flex-col px-4">
+          <VerificationTexts verifiedData={verifiedData} />
+
+          {trustInfo && verifiedData && (
+            <TrustInfoDisplay trustInfo={trustInfo} isAgeOver18={isAgeOver18} />
+          )}
+
+          {!query.isLoading && state.status !== 'success' ? (
+            <div className="mt-8">
+              <div
+                className="flex justify-center"
+                style={{ flexDirection: 'column' }}
+              >
+                {query.data?.request && <QrCode data={query.data.request} />}
+              </div>
             </div>
-            <div className="flex justify-end">
-              <Button onClick={() => setIsConfiguring(true)} text="configure" />
-              <ConfigureDialog
-                isOpen={isConfiguring}
-                setIsOpen={setIsConfiguring}
-                updateQuery={updateQuery}
-              />
+          ) : (
+            <div className="flex flex-row gap-4 mt-4">
+              {state.status === 'success' && (
+                <>
+                  <Button onClick={() => setIsOpen(true)} text="Show details" />
+                  <Button onClick={() => query.refetch()} text="New Request" />
+                  <DetailDialog
+                    isOpen={isOpen}
+                    setIsOpen={setIsOpen}
+                    verifiedData={verifiedData}
+                  />
+                </>
+              )}
             </div>
-          </div>
-        ) : (
-          <div className="mx-4 flex flex-row gap-4 mt-4">
-            {state.status === 'success' && (
-              <>
-                <Button onClick={() => setIsOpen(true)} text="Show details" />
-                <Button onClick={() => query.refetch()} text="New Request" />
-                <DetailDialog
-                  isOpen={isOpen}
-                  setIsOpen={setIsOpen}
-                  verifiedData={verifiedData}
-                />
-              </>
-            )}
-          </div>
-        )}
+          )}
+          <ConfigureDialog
+            isOpen={isConfiguring}
+            setIsOpen={setIsConfiguring}
+            updateQuery={updateQuery}
+          />
+        </main>
+        <Footer />
       </div>
-      <Footer />
     </div>
   );
 }
