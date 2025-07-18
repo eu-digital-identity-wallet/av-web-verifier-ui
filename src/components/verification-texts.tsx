@@ -13,12 +13,12 @@ export default function VerificationTexts({
     | null;
 }) {
   return (
-    <div className="w-3/4 mx-4">
+    <div className="w-3/4">
       <h2 className="text-2xl font-medium mt-8">Prove your age</h2>
       <p className="mt-2">
         {verifiedData
           ? verifiedData.filter(
-              (item) => item.key === 'eu.europa.ec.agev10n:age_over_18'
+              (item) => item.key === 'eu.europa.ec.av.1:age_over_18'
             )[0]?.value === 'true'
             ? 'You have successfully proven your age'
             : 'You have not been able to prove that you are over 18 years old'

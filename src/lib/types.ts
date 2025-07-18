@@ -36,14 +36,51 @@ export type Errored = {
 
 export type Fields = {
   age_over_18: boolean;
-  issue_date: boolean;
+  age_over_13: boolean;
+  age_over_15: boolean;
+  age_over_16: boolean;
+  age_over_21: boolean;
+  age_over_23: boolean;
+  age_over_25: boolean;
+  age_over_27: boolean;
+  age_over_28: boolean;
+  age_over_40: boolean;
+  age_over_60: boolean;
+  age_over_65: boolean;
+  age_over_67: boolean;
+  /* issue_date: boolean;
   expiry_date: boolean;
   issuing_authority: boolean;
   issuing_jurisdiction: boolean;
-  issuing_country: boolean;
+  issuing_country: boolean;*/
 };
 
 export type PresentationFields = {
   path: string[];
-  intent_to_retain: boolean;
+};
+
+export type TrustInfo = {
+  issuer_in_trusted_list: boolean;
+  issuer_not_expired: boolean;
+  trusted_list_source: string;
+  valid_from: string;
+  valid_until: string;
+  validation_errors: string[];
+  is_fully_trusted: boolean;
+};
+
+export type PresentationState = {
+  vp_token: {
+    proof_of_age: string;
+  };
+  presentation_submission: {
+    id: string;
+    definition_id: string;
+    descriptor_map: Array<{
+      id: string;
+      format: string;
+      path: string;
+    }>;
+  };
+  trust_info: TrustInfo[];
 };
