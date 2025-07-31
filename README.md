@@ -12,10 +12,10 @@ SPDX-License-Identifier: Apache-2.0
 
 <p align="center">
   <a href="#about">About</a> •
-  <a href="#disclaimer">Disclaimer</a> •
   <a href="#development">Development</a> •
   <a href="#documentation">Documentation</a> •
   <a href="#support-and-feedback">Support</a> •
+  <a href="#important-note">Important note</a> •
   <a href="#code-of-conduct">Code of Conduct</a> •
   <a href="#license">Licensing</a>
 </p>
@@ -29,25 +29,6 @@ The Verifier Service consists of two components: the frontend (UI) and the actua
 This frontend is a minimal version of a verifier frontend, designed to make it easier for relying parties and to provide a simple illustration of how to use the verifier service.
 
 A more comprehensive and illustrative use case for a verifier can be found in the repository [Cinema](https://github.com/eu-digital-identity-wallet/av-verifier-frontend-cinema), which is based on a fictional cinema portal.
-
-## Disclaimer
-
-This is a first release of the software, developed solely for the purpose of demonstrating the business flow of the solution. It is not intended for production use and does not yet include the full set of functional, security, or integration features required for a live deployment.
-
-The current release provides only basic functionality, with several key features to be introduced in future versions.
-
-These planned features align with the requirements and methods described in the Age Verification Profile.
-
-This version should be considered a foundational prototype to support early testing, feedback, and integration discussions.
-
-**Important limitations:**
-- The release may be changed substantially over time and might introduce new features, change, or remove existing ones, potentially breaking compatibility with your existing code.
-- The release may contain errors, design flaws, or other problems that could cause system or other failures and data loss.
-- The release has reduced security, privacy, availability, and reliability standards relative to future releases. This could make the software slower, less reliable, or more vulnerable to attacks than mature software.
-- The release is not yet comprehensively documented.
-- Users of the software must perform sufficient engineering and additional testing to properly evaluate their application and determine whether any of the open-sourced components are suitable for use in that application.
-- We strongly recommend not putting this version of the software into production use.
-- Only the latest version of the software will be supported.
 
 ## Development
 
@@ -72,7 +53,14 @@ We welcome discussions, feedback, and support requests through the following cha
 | Type              | Channel                                                                 |
 |-------------------|-------------------------------------------------------------------------|
 | **Issues**        | <a href="/../../issues" title="Open Issues"><img src="https://img.shields.io/github/issues/eu-digital-identity-wallet/av-web-verifier-ui?style=flat"></a> |
+| **Discussion**    | <a href="https://github.com/eu-digital-identity-wallet/av-doc-technical-specification/discussions" title="Discussion"><img src="https://img.shields.io/github/discussions/eu-digital-identity-wallet/av-doc-technical-specification"></a>  |
 | **Other Requests**| <a href="mailto:av-tscy@scytales.com" title="Email AVS Team"><img src="https://img.shields.io/badge/email-AVS%20team-green?logo=mail.ru&style=flat-square&logoColor=white"></a> |
+
+## Important note
+
+This white-label application is a reference implementation of the Age Verification solution that should be customised before publishing it. The current version is not feature complete and will require further integration work before production deployment. In particular, any national-specific enrolment procedures must be implemented by the respective Member States or publishing parties.
+
+Please note that this application is still under active development. It is regularly updated and new features and improvements are continuously being added.
 
 ## Code of Conduct
 
