@@ -7,6 +7,7 @@ import { TrustInfo } from '../lib/types';
 interface TrustInfoDisplayProps {
   trustInfo: TrustInfo[];
   isAgeOver18: boolean;
+  usedDcApi: boolean;
 }
 
 interface TrustCheckItemProps {
@@ -67,6 +68,7 @@ function TrustCheckItem({ label, isValid, description }: TrustCheckItemProps) {
 export default function TrustInfoDisplay({
   trustInfo,
   isAgeOver18,
+  usedDcApi,
 }: TrustInfoDisplayProps) {
   if (!trustInfo || trustInfo.length === 0) {
     return null;
@@ -77,12 +79,12 @@ export default function TrustInfoDisplay({
   const checks = [
     {
       label: 'Issuer is trusted',
-      isValid: trust.issuer_in_trusted_list,
+      isValid: usedDcApi ? true : trust.issuer_in_trusted_list,
       description: `Source: ${trust.trusted_list_source}`,
     },
     {
       label: 'Issuer has not expired',
-      isValid: trust.issuer_not_expired,
+      isValid: usedDcApi ? true : trust.issuer_not_expired,
       description: `Valid until: ${new Date(trust.valid_until).toLocaleDateString('en-US')}`,
     },
     {

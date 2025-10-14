@@ -44,6 +44,7 @@ function App() {
     },
   ]);
   const [trustInfo, setTrustInfo] = useState<TrustInfo[] | null>(null);
+  const [usedDcApi, setUsedDcApi] = useState(false);
 
   const useDcApi = shouldUseDcApi();
 
@@ -91,6 +92,7 @@ function App() {
     if ('pages' in data) {
       const allLines = data.pages.flatMap((page) => page.lines);
       setVerifiedData(allLines);
+      setUsedDcApi(true);
       const issuerLine = allLines.find((line) => line.key === 'Issuer');
       const isTrusted = issuerLine
         ? !String(issuerLine.value).includes('Not in trust list')
@@ -106,6 +108,7 @@ function App() {
       if (data.trust_info) {
         setTrustInfo(data.trust_info);
       }
+      setUsedDcApi(false);
       try {
         const decodedData = decode(data.vp_token.proof_of_age);
         if (decodedData.length > 0) {
@@ -144,6 +147,7 @@ function App() {
     return () => {
       setVerifiedData(null);
       setTrustInfo(null);
+      setUsedDcApi(false);
     };
   }, [state.data]);
 
@@ -158,7 +162,11 @@ function App() {
           <VerificationTexts verifiedData={verifiedData} />
 
           {trustInfo && verifiedData && (
-            <TrustInfoDisplay trustInfo={trustInfo} isAgeOver18={isAgeOver18} />
+            <TrustInfoDisplay
+              trustInfo={trustInfo}
+              isAgeOver18={isAgeOver18}
+              usedDcApi={usedDcApi}
+            />
           )}
 
           {!verifiedData ? (
