@@ -2,12 +2,18 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   CreatePresentationRequest,
   GetPresentationState,
 } from './lib/presentation';
-import { type PresentationFields, Fields, TrustInfo } from './lib/types';
+import {
+  type PresentationFields,
+  Fields,
+  TrustInfo,
+  DcApiDeviceResponse,
+  PresentationState,
+} from './lib/types';
 import { decode } from './lib/cbor';
 import { useEffect, useState } from 'react';
 import DetailDialog from './components/detail-dialog';
@@ -18,6 +24,7 @@ import Footer from './components/footer';
 import ConfigureDialog from './components/configure-dialog';
 import VerificationTexts from './components/verification-texts';
 import TrustInfoDisplay from './components/trust-info';
+import { performDcApiVerification, shouldUseDcApi } from './lib/dc-api.ts';
 
 function App() {
   const [verifiedData, setVerifiedData] = useState<
@@ -38,6 +45,8 @@ function App() {
   ]);
   const [trustInfo, setTrustInfo] = useState<TrustInfo[] | null>(null);
 
+  const useDcApi = shouldUseDcApi();
+
   const query = useQuery({
     queryKey: ['proofRequest', presentationFields],
     queryFn: async () => CreatePresentationRequest(presentationFields),
@@ -47,36 +56,58 @@ function App() {
   const state = useQuery({
     queryKey: ['proofState', query.data?.transaction_id],
     queryFn: async () => GetPresentationState(query.data.transaction_id),
-    enabled: !!query.data?.transaction_id && verifiedData === null,
+    enabled: !useDcApi && !!query.data?.transaction_id && verifiedData === null,
     refetchInterval: 1500,
   });
 
   function updateQuery(fields: Fields) {
     setIsConfiguring(false);
     const newPresentationFields: PresentationFields[] = Object.keys(fields)
-      .filter((key) => fields[key as keyof Fields] === true)
+      .filter((key) => fields[key as keyof Fields])
       .map((key) => ({
         path: ['eu.europa.ec.av.1', key],
       }));
     setPresentationFields(newPresentationFields);
     query.refetch();
+    dcApiMutation.reset();
   }
 
-  const isAgeOver18 = verifiedData
-    ? verifiedData.filter(
-        (item) => item.key === 'eu.europa.ec.av.1:age_over_18'
-      )[0]?.value === 'true'
-    : false;
-
-  useEffect(() => {
-    if (state.data && state.data.vp_token && state.data.vp_token.proof_of_age) {
-      if (state.data.trust_info) {
-        setTrustInfo(state.data.trust_info);
+  const dcApiMutation = useMutation({
+    mutationFn: async () => performDcApiVerification(),
+    onSuccess: (data) => {
+      if (data) {
+        processVerificationResult(data);
       }
+    },
+    onError: (error) => {
+      console.error(error);
+      alert(`Verification failed: ${error.message}`);
+    },
+  });
 
+  function processVerificationResult(
+    data: DcApiDeviceResponse | PresentationState
+  ) {
+    if ('pages' in data) {
+      const allLines = data.pages.flatMap((page) => page.lines);
+      setVerifiedData(allLines);
+      const issuerLine = allLines.find((line) => line.key === 'Issuer');
+      const isTrusted = issuerLine
+        ? !String(issuerLine.value).includes('Not in trust list')
+        : false;
+
+      setTrustInfo([
+        {
+          issuer_in_trusted_list: isTrusted,
+          is_fully_trusted: isTrusted,
+        },
+      ] as TrustInfo[]);
+    } else if ('vp_token' in data) {
+      if (data.trust_info) {
+        setTrustInfo(data.trust_info);
+      }
       try {
-        const decodedData = decode(state.data.vp_token.proof_of_age);
-
+        const decodedData = decode(data.vp_token.proof_of_age);
         if (decodedData.length > 0) {
           const firstAttestation = decodedData[0];
           if (
@@ -89,6 +120,25 @@ function App() {
       } catch (error) {
         console.error('Failed to decode attestation:', error);
       }
+    }
+  }
+
+  const isAgeOver18 =
+    !!verifiedData &&
+    verifiedData.some((item) => {
+      const keyMatch =
+        item.key === 'eu.europa.ec.av.1:age_over_18' ||
+        item.key === 'age_over_18';
+      const val = item.value;
+      const valueTrue =
+        val === true || val === 'true' || val === 1 || val === '1';
+      return keyMatch && valueTrue;
+    });
+
+  useEffect(() => {
+    console.log('state.data', state.data);
+    if (state.data && state.data.vp_token && state.data.vp_token.proof_of_age) {
+      processVerificationResult(state.data);
     }
 
     return () => {
@@ -111,21 +161,34 @@ function App() {
             <TrustInfoDisplay trustInfo={trustInfo} isAgeOver18={isAgeOver18} />
           )}
 
-          {!query.isLoading && state.status !== 'success' ? (
+          {!verifiedData ? (
             <div className="mt-8">
               <div
-                className="flex justify-center"
-                style={{ flexDirection: 'column' }}
+                className="flex justify-center items-center"
+                style={{ flexDirection: 'column', minHeight: '300px' }}
               >
-                {query.data?.request && <QrCode data={query.data.request} />}
+                {useDcApi ? (
+                  <Button
+                    onClick={() => dcApiMutation.mutate()}
+                    text={
+                      dcApiMutation.isPending
+                        ? 'Waiting for wallet...'
+                        : 'Verify with Wallet'
+                    }
+                    disabled={dcApiMutation.isPending}
+                    className="py-4 px-8 text-lg"
+                  />
+                ) : (
+                  query.data?.request && <QrCode data={query.data.request} />
+                )}
               </div>
             </div>
           ) : (
             <div className="flex flex-row gap-4 mt-4">
-              {state.status === 'success' && (
+              {verifiedData && (
                 <>
                   <Button onClick={() => setIsOpen(true)} text="Show details" />
-                  <Button onClick={() => query.refetch()} text="New Request" />
+                  {/*<Button onClick={() => updateQuery({ age_over_18: true })} text="New Request" />*/}
                   <DetailDialog
                     isOpen={isOpen}
                     setIsOpen={setIsOpen}
