@@ -14,19 +14,7 @@ import {
  * Checks if the Digital Credentials (DC) API is available in the browser.
  */
 export function isDcApiAvailable(): boolean {
-  //return 'IdentityCredential' in window;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const pol: any = (document as any).featurePolicy || (document as any).policy;
-
-  if (pol?.allowedFeatures?.()?.includes('digital-credentials-get'))
-    return true;
-  if (pol?.allowsFeature?.('digital-credentials-get')) return true;
-
-  if (pol?.allowedFeatures?.()?.includes('identity-credentials-get'))
-    return true;
-  if (pol?.allowsFeature?.('identity-credentials-get')) return true;
-
-  return false;
+  return typeof window['DigitalCredential' as keyof Window] !== 'undefined';
 }
 
 /**
