@@ -68,7 +68,6 @@ function TrustCheckItem({ label, isValid, description }: TrustCheckItemProps) {
 export default function TrustInfoDisplay({
   trustInfo,
   isAgeOver18,
-  usedDcApi,
 }: TrustInfoDisplayProps) {
   if (!trustInfo || trustInfo.length === 0) {
     return null;
@@ -79,18 +78,18 @@ export default function TrustInfoDisplay({
   const checks = [
     {
       label: 'Issuer is trusted',
-      isValid: usedDcApi ? true : trust.issuer_in_trusted_list,
-      description: `Source: ${trust.trusted_list_source}`,
+      isValid: trust.issuer_in_trusted_list,
+      description: ``,
     },
     {
       label: 'Issuer has not expired',
-      isValid: usedDcApi ? true : trust.issuer_not_expired,
-      description: `Valid until: ${new Date(trust.valid_until).toLocaleDateString('en-US')}`,
+      isValid: trust.issuer_in_trusted_list,
+      description: ``,
     },
     {
       label: 'Age over 18 confirmed',
       isValid: isAgeOver18,
-      description: 'Age verification performed',
+      description: '',
     },
   ];
 

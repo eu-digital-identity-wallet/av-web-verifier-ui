@@ -128,7 +128,7 @@ async function dcProcessResponse(
 
   const response = await fetch(
     'https://dc-openwallet-verifier-backend-gmfrdchkavechkbj.westeurope-01.azurewebsites.net/verifier/dcGetData',
-    // 'http://localhost:8006/verifier/dcGetData',
+    //'http://localhost:8006/verifier/dcGetData',
     {
       method: 'POST',
       headers: {
