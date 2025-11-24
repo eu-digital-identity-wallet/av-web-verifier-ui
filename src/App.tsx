@@ -45,6 +45,7 @@ function App() {
   ]);
   const [trustInfo, setTrustInfo] = useState<TrustInfo[] | null>(null);
   const [usedDcApi, setUsedDcApi] = useState(false);
+  const [showQrCode, setShowQrCode] = useState(false);
 
   const useDcApi = shouldUseDcApi();
 
@@ -57,7 +58,10 @@ function App() {
   const state = useQuery({
     queryKey: ['proofState', query.data?.transaction_id],
     queryFn: async () => GetPresentationState(query.data.transaction_id),
-    enabled: !useDcApi && !!query.data?.transaction_id && verifiedData === null,
+    enabled:
+      !!query.data?.transaction_id &&
+      verifiedData === null &&
+      (!useDcApi || (useDcApi && showQrCode)),
     refetchInterval: 1500,
   });
 
@@ -71,6 +75,7 @@ function App() {
     setPresentationFields(newPresentationFields);
     query.refetch();
     dcApiMutation.reset();
+    setShowQrCode(false);
   }
 
   const dcApiMutation = useMutation({
@@ -176,16 +181,33 @@ function App() {
                 style={{ flexDirection: 'column', minHeight: '300px' }}
               >
                 {useDcApi ? (
-                  <Button
-                    onClick={() => dcApiMutation.mutate()}
-                    text={
-                      dcApiMutation.isPending
-                        ? 'Waiting for wallet...'
-                        : 'Verify with Wallet'
-                    }
-                    disabled={dcApiMutation.isPending}
-                    className="py-4 px-8 text-lg"
-                  />
+                  <>
+                    {query.data?.request && (
+                      <>
+                        <Button
+                          onClick={() => dcApiMutation.mutate()}
+                          text={
+                            dcApiMutation.isPending
+                              ? 'Waiting for wallet...'
+                              : 'Verify with Wallet'
+                          }
+                          disabled={dcApiMutation.isPending}
+                          className="py-4 px-8 text-lg"
+                        />
+                        <Button
+                          onClick={() => setShowQrCode(true)}
+                          text="Show QR Code"
+                          disabled={dcApiMutation.isPending}
+                          className="py-4 px-8 text-lg mt-4"
+                        />
+                        {showQrCode && (
+                          <div className="mt-8">
+                            <QrCode data={query.data.request} />
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </>
                 ) : (
                   query.data?.request && <QrCode data={query.data.request} />
                 )}
