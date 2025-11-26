@@ -13,7 +13,9 @@ import {
   TrustInfo,
   DcApiDeviceResponse,
   PresentationState,
+  TransactionLog,
 } from './lib/types';
+import { v4 as uuidv4 } from 'uuid';
 import { decode } from './lib/cbor';
 import { useEffect, useState } from 'react';
 import DetailDialog from './components/detail-dialog';
@@ -24,6 +26,7 @@ import Footer from './components/footer';
 import ConfigureDialog from './components/configure-dialog';
 import VerificationTexts from './components/verification-texts';
 import TrustInfoDisplay from './components/trust-info';
+import TransactionLogsDialog from './components/transaction-logs-dialog';
 import { performDcApiVerification, shouldUseDcApi } from './lib/dc-api.ts';
 
 function App() {
@@ -36,6 +39,7 @@ function App() {
   >(null);
   const [isOpen, setIsOpen] = useState(false);
   const [isConfiguring, setIsConfiguring] = useState(false);
+  const [isTransactionLogsOpen, setIsTransactionLogsOpen] = useState(false);
   const [presentationFields, setPresentationFields] = useState<
     PresentationFields[]
   >([
@@ -46,23 +50,71 @@ function App() {
   const [trustInfo, setTrustInfo] = useState<TrustInfo[] | null>(null);
   const [usedDcApi, setUsedDcApi] = useState(false);
   const [showQrCode, setShowQrCode] = useState(false);
+  const [transactionLogs, setTransactionLogs] = useState<TransactionLog[]>([]);
 
   const useDcApi = shouldUseDcApi();
 
+  const addLog = (
+    type: TransactionLog['type'],
+    options: {
+      transactionId?: string;
+      request?: unknown;
+      response?: unknown;
+      error?: string;
+    } = {}
+  ) => {
+    const log: TransactionLog = {
+      id: uuidv4(),
+      timestamp: new Date(),
+      type,
+      ...options,
+    };
+    setTransactionLogs((prev) => [...prev, log]);
+  };
+
   const query = useQuery({
     queryKey: ['proofRequest', presentationFields],
-    queryFn: async () => CreatePresentationRequest(presentationFields),
+    queryFn: async () => {
+      const request = {
+        type: 'vp_token',
+        fields: presentationFields,
+      };
+      const response = await CreatePresentationRequest(presentationFields);
+      addLog('initialized', {
+        transactionId: response.transaction_id,
+        request,
+        response,
+      });
+      return response;
+    },
     refetchOnWindowFocus: false,
   });
 
   const state = useQuery({
     queryKey: ['proofState', query.data?.transaction_id],
-    queryFn: async () => GetPresentationState(query.data.transaction_id),
+    queryFn: async () => {
+      try {
+        const response = await GetPresentationState(query.data.transaction_id);
+        addLog('polling', {
+          transactionId: query.data.transaction_id,
+          response,
+        });
+        return response;
+      } catch (error) {
+        addLog('error', {
+          transactionId: query.data.transaction_id,
+          error:
+            error instanceof Error ? error.message : 'Unknown polling error',
+        });
+        throw error;
+      }
+    },
     enabled:
       !!query.data?.transaction_id &&
       verifiedData === null &&
       (!useDcApi || (useDcApi && showQrCode)),
     refetchInterval: 1500,
+    retry: false,
   });
 
   function updateQuery(fields: Fields) {
@@ -73,13 +125,19 @@ function App() {
         path: ['eu.europa.ec.av.1', key],
       }));
     setPresentationFields(newPresentationFields);
+    setTransactionLogs([]);
     query.refetch();
     dcApiMutation.reset();
     setShowQrCode(false);
   }
 
   const dcApiMutation = useMutation({
-    mutationFn: async () => performDcApiVerification(),
+    mutationFn: async () => {
+      addLog('initialized', {
+        request: { method: 'DC API', origin: window.location.origin },
+      });
+      return performDcApiVerification();
+    },
     onSuccess: (data) => {
       if (data) {
         processVerificationResult(data);
@@ -87,6 +145,10 @@ function App() {
     },
     onError: (error) => {
       console.error(error);
+      addLog('error', {
+        error:
+          error instanceof Error ? error.message : 'DC API verification failed',
+      });
       alert(`Verification failed: ${error.message}`);
     },
   });
@@ -109,6 +171,10 @@ function App() {
           is_fully_trusted: isTrusted,
         },
       ] as TrustInfo[]);
+
+      addLog('success', {
+        response: data,
+      });
     } else if ('vp_token' in data) {
       if (data.trust_info) {
         setTrustInfo(data.trust_info);
@@ -123,10 +189,21 @@ function App() {
             firstAttestation.attributes
           ) {
             setVerifiedData(firstAttestation.attributes);
+            addLog('success', {
+              transactionId: query.data?.transaction_id,
+              response: data,
+            });
           }
         }
       } catch (error) {
         console.error('Failed to decode attestation:', error);
+        addLog('error', {
+          transactionId: query.data?.transaction_id,
+          error:
+            error instanceof Error
+              ? error.message
+              : 'Failed to decode attestation',
+        });
       }
     }
   }
@@ -162,6 +239,8 @@ function App() {
         <Header
           openConfigureDialog={isConfiguring}
           setOpenCofigureDialog={setIsConfiguring}
+          openTransactionLogsDialog={isTransactionLogsOpen}
+          setOpenTransactionLogsDialog={setIsTransactionLogsOpen}
         />
         <main className="flex-grow flex flex-col px-4">
           <VerificationTexts verifiedData={verifiedData} />
@@ -232,6 +311,11 @@ function App() {
             isOpen={isConfiguring}
             setIsOpen={setIsConfiguring}
             updateQuery={updateQuery}
+          />
+          <TransactionLogsDialog
+            isOpen={isTransactionLogsOpen}
+            setIsOpen={setIsTransactionLogsOpen}
+            transactionLogs={transactionLogs}
           />
         </main>
         <Footer />

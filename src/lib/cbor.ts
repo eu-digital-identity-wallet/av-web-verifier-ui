@@ -12,8 +12,8 @@ import {
 } from './types';
 
 export function decode(attestation: string): PresentedAttestation[] {
-  const buffer = decodeBase64OrHex(attestation);
-  //const buffer = decodeBase64OrHex(attestation[0]); // TODO openid4vp draft 24 = const buffer = decodeBase64OrHex(attestation);
+  //const buffer = decodeBase64OrHex(attestation);
+  const buffer = decodeBase64OrHex(attestation[0]); // TODO openid4vp draft 24 = const buffer = decodeBase64OrHex(attestation);
   const decodedData = decodeCborData(buffer) as { documents: unknown[] };
 
   if (decodedData.documents.length === 1) {

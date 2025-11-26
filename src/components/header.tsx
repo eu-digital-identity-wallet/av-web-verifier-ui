@@ -7,9 +7,13 @@ import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 export default function Header({
   openConfigureDialog,
   setOpenCofigureDialog,
+  openTransactionLogsDialog,
+  setOpenTransactionLogsDialog,
 }: {
   openConfigureDialog: boolean;
   setOpenCofigureDialog: (open: boolean) => void;
+  openTransactionLogsDialog: boolean;
+  setOpenTransactionLogsDialog: (open: boolean) => void;
 }) {
   return (
     <div className="p-4 shadow-lg rounded-lg flex justify-between items-center">
@@ -29,14 +33,24 @@ export default function Header({
         </MenuButton>
         <MenuItems
           anchor="bottom"
-          className="mt-2 w-48 bg-white shadow-lg rounded-lg ring-1 ring-black/5 focus:outline-none"
+          className="mt-2 w-56 bg-white shadow-lg rounded-lg ring-1 ring-black/5 focus:outline-none"
         >
           <MenuItem>
             <a
-              className="block px-4 py-2 rounded cursor-pointer"
+              className="block px-4 py-2 rounded cursor-pointer hover:bg-gray-100"
               onClick={() => setOpenCofigureDialog(!openConfigureDialog)}
             >
               Configure Claims
+            </a>
+          </MenuItem>
+          <MenuItem>
+            <a
+              className="block px-4 py-2 rounded cursor-pointer hover:bg-gray-100"
+              onClick={() =>
+                setOpenTransactionLogsDialog(!openTransactionLogsDialog)
+              }
+            >
+              Inspect Transaction Logs
             </a>
           </MenuItem>
         </MenuItems>

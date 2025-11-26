@@ -119,3 +119,19 @@ export interface Line {
   key: string;
   value: string;
 }
+
+export type TransactionLogType =
+  | 'initialized'
+  | 'polling'
+  | 'success'
+  | 'error';
+
+export interface TransactionLog {
+  id: string;
+  timestamp: Date;
+  type: TransactionLogType;
+  transactionId?: string;
+  request?: unknown;
+  response?: unknown;
+  error?: string;
+}
