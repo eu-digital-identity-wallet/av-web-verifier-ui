@@ -242,7 +242,7 @@ function App() {
           openTransactionLogsDialog={isTransactionLogsOpen}
           setOpenTransactionLogsDialog={setIsTransactionLogsOpen}
         />
-        <main className="flex-grow flex flex-col px-4">
+        <main className="flex-grow flex flex-col px-4 mb-4">
           <VerificationTexts verifiedData={verifiedData} />
 
           {trustInfo && verifiedData && (
@@ -255,10 +255,7 @@ function App() {
 
           {!verifiedData ? (
             <div className="mt-8">
-              <div
-                className="flex justify-center items-center"
-                style={{ flexDirection: 'column', minHeight: '300px' }}
-              >
+              <div className="flex justify-center items-center flex-col min-h-[300px]">
                 {useDcApi ? (
                   <>
                     {query.data?.request && (
@@ -268,14 +265,14 @@ function App() {
                           text={
                             dcApiMutation.isPending
                               ? 'Waiting for wallet...'
-                              : 'Verify with Wallet'
+                              : 'DC API'
                           }
                           disabled={dcApiMutation.isPending}
                           className="py-4 px-8 text-lg"
                         />
                         <Button
                           onClick={() => setShowQrCode(true)}
-                          text="Show QR Code"
+                          text="OpenID4VP"
                           disabled={dcApiMutation.isPending}
                           className="py-4 px-8 text-lg mt-4"
                         />
