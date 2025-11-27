@@ -7,6 +7,7 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface ImportMetaEnv {
   readonly VITE_FEATURE_FLAG_DC_API: string;
+  readonly VITE_DC_API_VERIFIER_BASE_URL: string;
 }
 
 declare global {

@@ -10,6 +10,8 @@ import {
 // const verifierUrl = import.meta.env.VITE_VERIFIER_BASE_URL;
 // const featureFlagDcApi = import.meta.env.VITE_FEATURE_FLAG_DC_API === 'true';
 
+const dcApiVerifierUrl = import.meta.env.VITE_DC_API_VERIFIER_BASE_URL;
+
 /**
  * Checks if the Digital Credentials (DC) API is available in the browser.
  */
@@ -30,8 +32,7 @@ export async function performDcApiVerification() {
   const claim = 'age_over_18';
 
   const challengeResponse = await fetch(
-    'https://dc-openwallet-verifier-backend-gmfrdchkavechkbj.westeurope-01.azurewebsites.net/verifier/dcBegin',
-    //'http://localhost:8006/verifier/dcBegin',
+    `${dcApiVerifierUrl}/verifier/dcBegin`,
     {
       method: 'POST',
       headers: {
