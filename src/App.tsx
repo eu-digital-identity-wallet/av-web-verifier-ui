@@ -2,12 +2,20 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   CreatePresentationRequest,
   GetPresentationState,
 } from './lib/presentation';
-import { type PresentationFields, Fields, TrustInfo } from './lib/types';
+import {
+  type PresentationFields,
+  Fields,
+  TrustInfo,
+  DcApiDeviceResponse,
+  PresentationState,
+  TransactionLog,
+} from './lib/types';
+import { v4 as uuidv4 } from 'uuid';
 import { decode } from './lib/cbor';
 import { useEffect, useState } from 'react';
 import DetailDialog from './components/detail-dialog';
@@ -18,6 +26,8 @@ import Footer from './components/footer';
 import ConfigureDialog from './components/configure-dialog';
 import VerificationTexts from './components/verification-texts';
 import TrustInfoDisplay from './components/trust-info';
+import TransactionLogsDialog from './components/transaction-logs-dialog';
+import { performDcApiVerification, shouldUseDcApi } from './lib/dc-api.ts';
 
 function App() {
   const [verifiedData, setVerifiedData] = useState<
@@ -29,6 +39,7 @@ function App() {
   >(null);
   const [isOpen, setIsOpen] = useState(false);
   const [isConfiguring, setIsConfiguring] = useState(false);
+  const [isTransactionLogsOpen, setIsTransactionLogsOpen] = useState(false);
   const [presentationFields, setPresentationFields] = useState<
     PresentationFields[]
   >([
@@ -37,46 +48,140 @@ function App() {
     },
   ]);
   const [trustInfo, setTrustInfo] = useState<TrustInfo[] | null>(null);
+  const [usedDcApi, setUsedDcApi] = useState(false);
+  const [showQrCode, setShowQrCode] = useState(false);
+  const [transactionLogs, setTransactionLogs] = useState<TransactionLog[]>([]);
+
+  const useDcApi = shouldUseDcApi();
+
+  const addLog = (
+    type: TransactionLog['type'],
+    options: {
+      transactionId?: string;
+      request?: unknown;
+      response?: unknown;
+      error?: string;
+    } = {}
+  ) => {
+    const log: TransactionLog = {
+      id: uuidv4(),
+      timestamp: new Date(),
+      type,
+      ...options,
+    };
+    setTransactionLogs((prev) => [...prev, log]);
+  };
 
   const query = useQuery({
     queryKey: ['proofRequest', presentationFields],
-    queryFn: async () => CreatePresentationRequest(presentationFields),
+    queryFn: async () => {
+      const request = {
+        type: 'vp_token',
+        fields: presentationFields,
+      };
+      const response = await CreatePresentationRequest(presentationFields);
+      addLog('initialized', {
+        transactionId: response.transaction_id,
+        request,
+        response,
+      });
+      return response;
+    },
     refetchOnWindowFocus: false,
   });
 
   const state = useQuery({
     queryKey: ['proofState', query.data?.transaction_id],
-    queryFn: async () => GetPresentationState(query.data.transaction_id),
-    enabled: !!query.data?.transaction_id && verifiedData === null,
+    queryFn: async () => {
+      try {
+        const response = await GetPresentationState(query.data.transaction_id);
+        addLog('polling', {
+          transactionId: query.data.transaction_id,
+          response,
+        });
+        return response;
+      } catch (error) {
+        addLog('error', {
+          transactionId: query.data.transaction_id,
+          error:
+            error instanceof Error ? error.message : 'Unknown polling error',
+        });
+        throw error;
+      }
+    },
+    enabled:
+      !!query.data?.transaction_id &&
+      verifiedData === null &&
+      (!useDcApi || (useDcApi && showQrCode)),
     refetchInterval: 1500,
+    retry: false,
   });
 
   function updateQuery(fields: Fields) {
     setIsConfiguring(false);
     const newPresentationFields: PresentationFields[] = Object.keys(fields)
-      .filter((key) => fields[key as keyof Fields] === true)
+      .filter((key) => fields[key as keyof Fields])
       .map((key) => ({
         path: ['eu.europa.ec.av.1', key],
       }));
     setPresentationFields(newPresentationFields);
+    setTransactionLogs([]);
     query.refetch();
+    dcApiMutation.reset();
+    setShowQrCode(false);
   }
 
-  const isAgeOver18 = verifiedData
-    ? verifiedData.filter(
-        (item) => item.key === 'eu.europa.ec.av.1:age_over_18'
-      )[0]?.value === 'true'
-    : false;
-
-  useEffect(() => {
-    if (state.data && state.data.vp_token && state.data.vp_token.proof_of_age) {
-      if (state.data.trust_info) {
-        setTrustInfo(state.data.trust_info);
+  const dcApiMutation = useMutation({
+    mutationFn: async () => {
+      addLog('initialized', {
+        request: { method: 'DC API', origin: window.location.origin },
+      });
+      return performDcApiVerification();
+    },
+    onSuccess: (data) => {
+      if (data) {
+        processVerificationResult(data);
       }
+    },
+    onError: (error) => {
+      console.error(error);
+      addLog('error', {
+        error:
+          error instanceof Error ? error.message : 'DC API verification failed',
+      });
+      alert(`Verification failed: ${error.message}`);
+    },
+  });
 
+  function processVerificationResult(
+    data: DcApiDeviceResponse | PresentationState
+  ) {
+    if ('pages' in data) {
+      const allLines = data.pages.flatMap((page) => page.lines);
+      setVerifiedData(allLines);
+      setUsedDcApi(true);
+      const issuerLine = allLines.find((line) => line.key === 'Issuer');
+      const isTrusted = issuerLine
+        ? !String(issuerLine.value).includes('Not in trust list')
+        : false;
+
+      setTrustInfo([
+        {
+          issuer_in_trusted_list: isTrusted,
+          is_fully_trusted: isTrusted,
+        },
+      ] as TrustInfo[]);
+
+      addLog('success', {
+        response: data,
+      });
+    } else if ('vp_token' in data) {
+      if (data.trust_info) {
+        setTrustInfo(data.trust_info);
+      }
+      setUsedDcApi(false);
       try {
-        const decodedData = decode(state.data.vp_token.proof_of_age);
-
+        const decodedData = decode(data.vp_token.proof_of_age);
         if (decodedData.length > 0) {
           const firstAttestation = decodedData[0];
           if (
@@ -84,16 +189,47 @@ function App() {
             firstAttestation.attributes
           ) {
             setVerifiedData(firstAttestation.attributes);
+            addLog('success', {
+              transactionId: query.data?.transaction_id,
+              response: data,
+            });
           }
         }
       } catch (error) {
         console.error('Failed to decode attestation:', error);
+        addLog('error', {
+          transactionId: query.data?.transaction_id,
+          error:
+            error instanceof Error
+              ? error.message
+              : 'Failed to decode attestation',
+        });
       }
+    }
+  }
+
+  const isAgeOver18 =
+    !!verifiedData &&
+    verifiedData.some((item) => {
+      const keyMatch =
+        item.key === 'eu.europa.ec.av.1:age_over_18' ||
+        item.key === 'age_over_18';
+      const val = item.value;
+      const valueTrue =
+        val === true || val === 'true' || val === 1 || val === '1';
+      return keyMatch && valueTrue;
+    });
+
+  useEffect(() => {
+    console.log('state.data', state.data);
+    if (state.data && state.data.vp_token && state.data.vp_token.proof_of_age) {
+      processVerificationResult(state.data);
     }
 
     return () => {
       setVerifiedData(null);
       setTrustInfo(null);
+      setUsedDcApi(false);
     };
   }, [state.data]);
 
@@ -103,29 +239,62 @@ function App() {
         <Header
           openConfigureDialog={isConfiguring}
           setOpenCofigureDialog={setIsConfiguring}
+          openTransactionLogsDialog={isTransactionLogsOpen}
+          setOpenTransactionLogsDialog={setIsTransactionLogsOpen}
         />
-        <main className="flex-grow flex flex-col px-4">
+        <main className="flex-grow flex flex-col px-4 mb-4">
           <VerificationTexts verifiedData={verifiedData} />
 
           {trustInfo && verifiedData && (
-            <TrustInfoDisplay trustInfo={trustInfo} isAgeOver18={isAgeOver18} />
+            <TrustInfoDisplay
+              trustInfo={trustInfo}
+              isAgeOver18={isAgeOver18}
+              usedDcApi={usedDcApi}
+            />
           )}
 
-          {!query.isLoading && state.status !== 'success' ? (
+          {!verifiedData ? (
             <div className="mt-8">
-              <div
-                className="flex justify-center"
-                style={{ flexDirection: 'column' }}
-              >
-                {query.data?.request && <QrCode data={query.data.request} />}
+              <div className="flex justify-center items-center flex-col min-h-[300px]">
+                {useDcApi ? (
+                  <>
+                    {query.data?.request && (
+                      <>
+                        <Button
+                          onClick={() => dcApiMutation.mutate()}
+                          text={
+                            dcApiMutation.isPending
+                              ? 'Waiting for wallet...'
+                              : 'DC API'
+                          }
+                          disabled={dcApiMutation.isPending}
+                          className="py-4 px-8 text-lg"
+                        />
+                        <Button
+                          onClick={() => setShowQrCode(true)}
+                          text="OpenID4VP"
+                          disabled={dcApiMutation.isPending}
+                          className="py-4 px-8 text-lg mt-4"
+                        />
+                        {showQrCode && (
+                          <div className="mt-8">
+                            <QrCode data={query.data.request} />
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </>
+                ) : (
+                  query.data?.request && <QrCode data={query.data.request} />
+                )}
               </div>
             </div>
           ) : (
             <div className="flex flex-row gap-4 mt-4">
-              {state.status === 'success' && (
+              {verifiedData && (
                 <>
                   <Button onClick={() => setIsOpen(true)} text="Show details" />
-                  <Button onClick={() => query.refetch()} text="New Request" />
+                  {/*<Button onClick={() => updateQuery({ age_over_18: true })} text="New Request" />*/}
                   <DetailDialog
                     isOpen={isOpen}
                     setIsOpen={setIsOpen}
@@ -139,6 +308,11 @@ function App() {
             isOpen={isConfiguring}
             setIsOpen={setIsConfiguring}
             updateQuery={updateQuery}
+          />
+          <TransactionLogsDialog
+            isOpen={isTransactionLogsOpen}
+            setIsOpen={setIsTransactionLogsOpen}
+            transactionLogs={transactionLogs}
           />
         </main>
         <Footer />
