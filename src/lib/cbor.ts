@@ -12,7 +12,8 @@ import {
 } from './types';
 
 export function decode(attestation: string): PresentedAttestation[] {
-  const buffer = decodeBase64OrHex(attestation);
+  //const buffer = decodeBase64OrHex(attestation);
+  const buffer = decodeBase64OrHex(attestation[0]); // TODO openid4vp draft 24 = const buffer = decodeBase64OrHex(attestation);
   const decodedData = decodeCborData(buffer) as { documents: unknown[] };
 
   if (decodedData.documents.length === 1) {
@@ -56,6 +57,7 @@ function extractAttestationSingle(document: unknown): Single {
 
 function decodeBase64OrHex(input: string): Buffer {
   const base64Regex = /^[A-Za-z0-9-_]+$/;
+  console.log('input', input);
   if (base64Regex.test(input)) {
     const base64 = input.replace(/-/g, '+').replace(/_/g, '/');
     return Buffer.from(base64, 'base64');

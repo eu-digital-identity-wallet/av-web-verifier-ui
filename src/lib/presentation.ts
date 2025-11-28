@@ -31,7 +31,35 @@ export async function CreatePresentationRequest(fields: PresentationFields[]) {
     }),
   });
   if (!response.ok) {
-    throw new Error('Network response was not ok');
+    let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+
+    if (response.status === 400) {
+      errorMessage =
+        'Verifier failed to retrieve wallet response. Cause: Presentation should be in Submitted state but is in eu.europa.ec.eudi.verifier.endpoint.domain.Presentation$RequestObjectRetrieved';
+    } else {
+      try {
+        const errorText = await response.text();
+        if (errorText) {
+          try {
+            const errorData = JSON.parse(errorText);
+            if (errorData.message) {
+              errorMessage = errorData.message;
+            } else if (errorData.error) {
+              errorMessage = errorData.error;
+            } else if (typeof errorData === 'string') {
+              errorMessage = errorData;
+            } else {
+              errorMessage = errorText;
+            }
+          } catch {
+            errorMessage = errorText;
+          }
+        }
+      } catch {
+        // If reading response fails, use default HTTP error message
+      }
+    }
+    throw new Error(errorMessage);
   }
   const data = await response.json();
   return data;
@@ -50,7 +78,37 @@ export async function GetPresentationState(
     }
   );
   if (!response.ok) {
-    throw new Error('Network response was not ok');
+    let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+
+    if (response.status === 400) {
+      errorMessage =
+        'Verifier failed to retrieve wallet response. Cause: Presentation should be in Submitted state but is in eu.europa.ec.eudi.verifier.endpoint.domain.Presentation$RequestObjectRetrieved';
+    } else {
+      try {
+        const errorText = await response.text();
+        if (errorText) {
+          try {
+            const errorData = JSON.parse(errorText);
+            if (errorData.message) {
+              errorMessage = errorData.message;
+            } else if (errorData.error) {
+              errorMessage = errorData.error;
+            } else if (errorData.cause) {
+              errorMessage = `Verifier failed to retrieve wallet response. Cause: ${errorData.cause}`;
+            } else if (typeof errorData === 'string') {
+              errorMessage = errorData;
+            } else {
+              errorMessage = errorText;
+            }
+          } catch {
+            errorMessage = errorText;
+          }
+        }
+      } catch {
+        // If reading response fails, use default HTTP error message
+      }
+    }
+    throw new Error(errorMessage);
   }
   const data = await response.json();
   return data;

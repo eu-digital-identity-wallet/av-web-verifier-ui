@@ -7,6 +7,7 @@ import { TrustInfo } from '../lib/types';
 interface TrustInfoDisplayProps {
   trustInfo: TrustInfo[];
   isAgeOver18: boolean;
+  usedDcApi: boolean;
 }
 
 interface TrustCheckItemProps {
@@ -78,17 +79,17 @@ export default function TrustInfoDisplay({
     {
       label: 'Issuer is trusted',
       isValid: trust.issuer_in_trusted_list,
-      description: `Source: ${trust.trusted_list_source}`,
+      description: ``,
     },
     {
       label: 'Issuer has not expired',
-      isValid: trust.issuer_not_expired,
-      description: `Valid until: ${new Date(trust.valid_until).toLocaleDateString('en-US')}`,
+      isValid: trust.issuer_in_trusted_list,
+      description: ``,
     },
     {
       label: 'Age over 18 confirmed',
       isValid: isAgeOver18,
-      description: 'Age verification performed',
+      description: '',
     },
   ];
 
