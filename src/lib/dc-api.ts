@@ -1,120 +1,101 @@
 // SPDX-FileCopyrightText: 2025 European Commission
 //
 // SPDX-License-Identifier: Apache-2.0
+
 import {
+  DcApiChallenge,
   DcApiDeviceResponse,
-  DcApiResponse,
   IdentityRequestProvider,
 } from './types';
 
-// const verifierUrl = import.meta.env.VITE_VERIFIER_BASE_URL;
-// const featureFlagDcApi = import.meta.env.VITE_FEATURE_FLAG_DC_API === 'true';
-
 const dcApiVerifierUrl = import.meta.env.VITE_DC_API_VERIFIER_BASE_URL;
+const DOC_TYPE = 'eu.europa.ec.av.1';
 
-/**
- * Checks if the Digital Credentials (DC) API is available in the browser.
- */
-export function isDcApiAvailable(): boolean {
-  return typeof window['DigitalCredential' as keyof Window] !== 'undefined';
+export class DcApiUnavailableError extends Error {
+  constructor() {
+    super(
+      'Digital Credentials API is not available. Please enable it via chrome://flags#web-identity-digital-credentials.'
+    );
+    this.name = 'DcApiUnavailableError';
+  }
 }
 
-/**
- * Determines if the DC-API flow should be used.
- */
+export function isDcApiAvailable(): boolean {
+  return (
+    typeof window['DigitalCredential' as keyof Window] !== 'undefined' &&
+    typeof navigator.credentials?.get === 'function'
+  );
+}
+
 export function shouldUseDcApi(): boolean {
   return isDcApiAvailable();
 }
 
-export async function performDcApiVerification(requestId: string) {
-  const docType = 'eu.europa.ec.av.1';
-
-  const challengeResponse = await fetch(
-    `${dcApiVerifierUrl}/verifier/dcBegin`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        format: 'mdoc',
-        docType: docType,
-        requestId: requestId,
-        protocol: 'w3c_dc_mdoc_api',
-        origin: window.location.origin,
-        host: window.location.host,
-        signRequest: true,
-        encryptResponse: true,
-      }),
-    }
-  );
-
-  if (!challengeResponse.ok) {
-    throw new Error('Failed to get challenge from dc-api.');
+export async function performDcApiVerification(
+  requestId: string
+): Promise<DcApiDeviceResponse | undefined> {
+  if (!isDcApiAvailable()) {
+    throw new DcApiUnavailableError();
   }
-  const challenge = (await challengeResponse.json()) as DcApiResponse;
 
-  return await dcRequestCredential(
-    challenge.sessionId,
-    challenge.dcRequestProtocol,
-    challenge.dcRequestString
-  );
+  const challenge = await beginDcApiSession(requestId);
+  const credential = await requestCredential(challenge);
+  if (!credential) {
+    return undefined;
+  }
+  return completeDcApiSession(challenge.sessionId, credential);
 }
 
-async function dcRequestCredential(
-  sessionId: string,
-  dcRequestProtocol: string,
-  dcRequestString: string
-) {
-  if (!navigator.credentials || !navigator.credentials.get) {
-    alert(
-      'Digital Credentials API is not available. Please enable it via chrome://flags#web-identity-digital-credentials.'
+async function beginDcApiSession(requestId: string): Promise<DcApiChallenge> {
+  const response = await fetch(`${dcApiVerifierUrl}/verifier/dcBegin`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      format: 'mdoc',
+      docType: DOC_TYPE,
+      requestId,
+      protocol: 'w3c_dc_mdoc_api',
+      origin: window.location.origin,
+      host: window.location.host,
+      signRequest: true,
+      encryptResponse: true,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to get challenge from dc-api: ${response.status} ${response.statusText}`
     );
-    return;
   }
-
-  const providers: IdentityRequestProvider[] = [];
-  try {
-    providers.push({
-      protocol: dcRequestProtocol,
-      data: JSON.parse(dcRequestString),
-    });
-
-    const credentialsResponse: Credential | null =
-      await navigator.credentials.get({
-        digital: {
-          requests: providers,
-        },
-        mediation: 'required',
-      });
-
-    if (credentialsResponse) {
-      const dcResponse = await dcProcessResponse(
-        sessionId,
-        credentialsResponse
-      );
-      return dcResponse;
-    }
-  } catch (error) {
-    alert(error);
-  }
+  return (await response.json()) as DcApiChallenge;
 }
 
-async function dcProcessResponse(
-  sessionId: string,
-  credentialsResponse: Credential
-) {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
-  const digitalCredential = credentialsResponse as {
-    protocol: string;
-    data: string | object;
-  };
+async function requestCredential(
+  challenge: DcApiChallenge
+): Promise<DigitalCredential | null> {
+  const providers: IdentityRequestProvider[] = [
+    {
+      protocol: challenge.dcRequestProtocol,
+      data: JSON.parse(challenge.dcRequestString),
+    },
+  ];
 
+  const response = await navigator.credentials.get({
+    digital: { requests: providers },
+    mediation: 'required',
+  });
+
+  return response as DigitalCredential | null;
+}
+
+async function completeDcApiSession(
+  sessionId: string,
+  credential: DigitalCredential
+): Promise<DcApiDeviceResponse> {
   const dataStr =
-    typeof digitalCredential.data === 'string'
-      ? digitalCredential.data
-      : JSON.stringify(digitalCredential.data);
+    typeof credential.data === 'string'
+      ? credential.data
+      : JSON.stringify(credential.data);
 
   const response = await fetch(`${dcApiVerifierUrl}/verifier/dcGetData`, {
     method: 'POST',
@@ -123,8 +104,8 @@ async function dcProcessResponse(
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      sessionId: sessionId,
-      credentialProtocol: digitalCredential.protocol,
+      sessionId,
+      credentialProtocol: credential.protocol,
       credentialResponse: dataStr,
     }),
   });
