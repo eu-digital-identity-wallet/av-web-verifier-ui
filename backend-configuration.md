@@ -191,33 +191,27 @@ VITE_VERIFIER_BASE_URL=https://your-backend-domain.com
 
 **Example Request:**
 
+The frontend uses the DCQL (Digital Credentials Query Language) format:
+
 ```bash
 curl -X POST -H "Content-Type: application/json" \
   -d '{
     "type": "vp_token",
-    "presentation_definition": {
-      "id": "age-verification",
-      "input_descriptors": [
+    "dcql_query": {
+      "credentials": [
         {
-          "id": "eu.europa.ec.agev10n",
-          "format": {
-            "mso_mdoc": {
-              "alg": ["ES256"]
-            }
+          "id": "proof_of_age",
+          "format": "mso_mdoc",
+          "meta": {
+            "doctype_value": "eu.europa.ec.av.1"
           },
-          "constraints": {
-            "fields": [
-              {
-                "path": ["$['\''eu.europa.ec.agev10n'\'']['\''age_over_18'\'']"],
-                "intent_to_retain": false
-              }
-            ]
-          }
+          "claims": [
+            { "path": ["eu.europa.ec.av.1", "age_over_18"] }
+          ]
         }
       ]
     },
-    "nonce": "nonce",
-    "jar_mode": "by_reference"
+    "nonce": "<uuid>"
   }' \
   http://localhost:8080/ui/presentations
 ```
