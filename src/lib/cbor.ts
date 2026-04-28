@@ -3,61 +3,59 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Buffer } from 'buffer';
-import { decode as CborDecode } from 'cbor-x';
+import { decode as cborDecode } from 'cbor-x';
 import {
+  AttestationFormat,
+  KeyValue,
+  MdocDeviceResponse,
+  MdocDocument,
+  MdocElement,
   PresentedAttestation,
   Single,
-  KeyValue,
-  AttestationFormat,
 } from './types';
 
+const BASE64URL_REGEX = /^[A-Za-z0-9-_]+$/;
+
+// The backend wraps the base64url-encoded DeviceResponse in an array (OpenID4VP
+// draft 24). We currently only process the first entry.
 export function decode(attestation: string): PresentedAttestation[] {
-  //const buffer = decodeBase64OrHex(attestation);
-  const buffer = decodeBase64OrHex(attestation[0]); // TODO openid4vp draft 24 = const buffer = decodeBase64OrHex(attestation);
-  const decodedData = decodeCborData(buffer) as { documents: unknown[] };
+  const buffer = decodeBase64OrHex(attestation[0]);
+  const decodedData = decodeCborData(buffer) as MdocDeviceResponse | null;
+  if (!decodedData) {
+    return [];
+  }
 
   if (decodedData.documents.length === 1) {
     return [extractAttestationSingle(decodedData.documents[0])];
-  } else {
-    return decodedData.documents.map((doc) => extractAttestationSingle(doc));
   }
+  return decodedData.documents.map(extractAttestationSingle);
 }
 
-function extractAttestationSingle(document: unknown): Single {
-  const namespaces = (
-    document as {
-      issuerSigned: { nameSpaces: Record<string, { value: Uint8Array }[]> };
-    }
-  ).issuerSigned.nameSpaces;
-  const attributes: KeyValue<string, string>[] = [];
+function extractAttestationSingle(document: MdocDocument): Single {
+  const { nameSpaces } = document.issuerSigned;
+  const attributes: KeyValue<string, string>[] = Object.entries(
+    nameSpaces
+  ).flatMap(([namespace, items]) =>
+    items.map((item) => {
+      const element = decodeCborData(item.value) as MdocElement;
+      return {
+        key: `${namespace}:${element.elementIdentifier}`,
+        value: elementAsString(element.elementValue),
+      };
+    })
+  );
 
-  Object.keys(namespaces).forEach((it: string) => {
-    const namespace = namespaces[it];
-    for (const element of namespace) {
-      const decodedElement = decodeCborData(element.value);
-      attributes.push({
-        key:
-          it +
-          ':' +
-          (decodedElement as { elementIdentifier: string }).elementIdentifier,
-        value: elementAsString(
-          (decodedElement as { elementValue: unknown }).elementValue
-        ),
-      });
-    }
-  });
   return {
     kind: 'single',
     format: AttestationFormat.MSO_MDOC,
-    name: (document as { docType: string })['docType'],
-    attributes: attributes,
+    name: document.docType,
+    attributes,
     metadata: [],
   };
 }
 
 function decodeBase64OrHex(input: string): Buffer {
-  const base64Regex = /^[A-Za-z0-9-_]+$/;
-  if (base64Regex.test(input)) {
+  if (BASE64URL_REGEX.test(input)) {
     const base64 = input.replace(/-/g, '+').replace(/_/g, '/');
     return Buffer.from(base64, 'base64');
   }
@@ -66,7 +64,7 @@ function decodeBase64OrHex(input: string): Buffer {
 
 function decodeCborData(data: Uint8Array): unknown | null {
   try {
-    return CborDecode(data);
+    return cborDecode(data);
   } catch (error) {
     console.error('Failed to decode CBOR:', error);
     return null;
