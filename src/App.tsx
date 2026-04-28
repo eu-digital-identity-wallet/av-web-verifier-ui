@@ -50,6 +50,9 @@ function App() {
   const [trustInfo, setTrustInfo] = useState<TrustInfo[] | null>(null);
   const [usedDcApi, setUsedDcApi] = useState(false);
   const [showQrCode, setShowQrCode] = useState(false);
+  const [zkProofValidated, setZkProofValidated] = useState<boolean | null>(
+    null
+  );
   const [transactionLogs, setTransactionLogs] = useState<TransactionLog[]>([]);
 
   const useDcApi = shouldUseDcApi();
@@ -112,7 +115,7 @@ function App() {
     enabled:
       !!query.data?.transaction_id &&
       verifiedData === null &&
-      (!useDcApi || (useDcApi && showQrCode)),
+      (useDcApi || (!useDcApi && showQrCode)),
     refetchInterval: 1500,
     retry: false,
   });
@@ -132,11 +135,15 @@ function App() {
   }
 
   const dcApiMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (requestId: string) => {
       addLog('initialized', {
-        request: { method: 'DC API', origin: window.location.origin },
+        request: {
+          method: 'DC API',
+          origin: window.location.origin,
+          requestId,
+        },
       });
-      return performDcApiVerification();
+      return performDcApiVerification(requestId);
     },
     onSuccess: (data) => {
       if (data) {
@@ -158,12 +165,16 @@ function App() {
   ) {
     if ('pages' in data) {
       const allLines = data.pages.flatMap((page) => page.lines);
+      console.log('allLines', allLines);
       setVerifiedData(allLines);
       setUsedDcApi(true);
       const issuerLine = allLines.find((line) => line.key === 'Issuer');
       const isTrusted = issuerLine
         ? !String(issuerLine.value).includes('Not in trust list')
         : false;
+
+      const zkProofLine = allLines.find((line) => line.key === 'ZK proof');
+      setZkProofValidated(zkProofLine ? true : false);
 
       setTrustInfo([
         {
@@ -180,6 +191,7 @@ function App() {
         setTrustInfo(data.trust_info);
       }
       setUsedDcApi(false);
+      setZkProofValidated(null);
       try {
         const decodedData = decode(data.vp_token.proof_of_age);
         if (decodedData.length > 0) {
@@ -216,7 +228,11 @@ function App() {
         item.key === 'age_over_18';
       const val = item.value;
       const valueTrue =
-        val === true || val === 'true' || val === 1 || val === '1';
+        val === true ||
+        val === 'true' ||
+        val === 1 ||
+        val === '1' ||
+        val === '"true"';
       return keyMatch && valueTrue;
     });
 
@@ -230,6 +246,7 @@ function App() {
       setVerifiedData(null);
       setTrustInfo(null);
       setUsedDcApi(false);
+      setZkProofValidated(null);
     };
   }, [state.data]);
 
@@ -250,6 +267,7 @@ function App() {
               trustInfo={trustInfo}
               isAgeOver18={isAgeOver18}
               usedDcApi={usedDcApi}
+              zkProofValidated={zkProofValidated}
             />
           )}
 
@@ -261,7 +279,7 @@ function App() {
                     {query.data?.request && (
                       <>
                         <Button
-                          onClick={() => dcApiMutation.mutate()}
+                          onClick={() => dcApiMutation.mutate('age_over_18')}
                           text={
                             dcApiMutation.isPending
                               ? 'Waiting for wallet...'
@@ -269,6 +287,18 @@ function App() {
                           }
                           disabled={dcApiMutation.isPending}
                           className="py-4 px-8 text-lg"
+                        />
+                        <Button
+                          onClick={() =>
+                            dcApiMutation.mutate('age_over_18_zkp')
+                          }
+                          text={
+                            dcApiMutation.isPending
+                              ? 'Waiting for wallet...'
+                              : 'DC API (ZKP)'
+                          }
+                          disabled={dcApiMutation.isPending}
+                          className="py-4 px-8 text-lg mt-4"
                         />
                         <Button
                           onClick={() => setShowQrCode(true)}

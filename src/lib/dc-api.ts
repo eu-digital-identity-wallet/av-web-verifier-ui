@@ -27,9 +27,8 @@ export function shouldUseDcApi(): boolean {
   return isDcApiAvailable();
 }
 
-export async function performDcApiVerification() {
+export async function performDcApiVerification(requestId: string) {
   const docType = 'eu.europa.ec.av.1';
-  const claim = 'age_over_18';
 
   const challengeResponse = await fetch(
     `${dcApiVerifierUrl}/verifier/dcBegin`,
@@ -41,12 +40,12 @@ export async function performDcApiVerification() {
       body: JSON.stringify({
         format: 'mdoc',
         docType: docType,
-        requestId: claim,
+        requestId: requestId,
         protocol: 'w3c_dc_mdoc_api',
         origin: window.location.origin,
         host: window.location.host,
-        signRequest: false,
-        encryptResponse: false,
+        signRequest: true,
+        encryptResponse: true,
       }),
     }
   );
@@ -127,22 +126,18 @@ async function dcProcessResponse(
 
   console.log(dataStr);
 
-  const response = await fetch(
-    'https://dc-openwallet-verifier-backend-gmfrdchkavechkbj.westeurope-01.azurewebsites.net/verifier/dcGetData',
-    //'http://localhost:8006/verifier/dcGetData',
-    {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        sessionId: sessionId,
-        credentialProtocol: digitalCredential.protocol,
-        credentialResponse: dataStr,
-      }),
-    }
-  );
+  const response = await fetch(`${dcApiVerifierUrl}/verifier/dcGetData`, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      sessionId: sessionId,
+      credentialProtocol: digitalCredential.protocol,
+      credentialResponse: dataStr,
+    }),
+  });
 
   if (!response.ok) {
     const errorText = await response.text();

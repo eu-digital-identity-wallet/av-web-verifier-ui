@@ -8,6 +8,7 @@ interface TrustInfoDisplayProps {
   trustInfo: TrustInfo[];
   isAgeOver18: boolean;
   usedDcApi: boolean;
+  zkProofValidated?: boolean | null;
 }
 
 interface TrustCheckItemProps {
@@ -68,6 +69,7 @@ function TrustCheckItem({ label, isValid, description }: TrustCheckItemProps) {
 export default function TrustInfoDisplay({
   trustInfo,
   isAgeOver18,
+  zkProofValidated,
 }: TrustInfoDisplayProps) {
   if (!trustInfo || trustInfo.length === 0) {
     return null;
@@ -92,6 +94,14 @@ export default function TrustInfoDisplay({
       description: '',
     },
   ];
+
+  if (zkProofValidated !== null && zkProofValidated !== undefined) {
+    checks.push({
+      label: 'ZK proof validated',
+      isValid: zkProofValidated,
+      description: zkProofValidated ? 'Successfully validated proof' : '',
+    });
+  }
 
   const overallTrustScore = checks.filter((check) => check.isValid).length;
   const totalChecks = checks.length;
