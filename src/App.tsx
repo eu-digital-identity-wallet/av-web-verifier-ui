@@ -2,258 +2,65 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import { useMutation, useQuery } from '@tanstack/react-query';
-import {
-  CreatePresentationRequest,
-  GetPresentationState,
-} from './lib/presentation';
-import {
-  type PresentationFields,
-  Fields,
-  TrustInfo,
-  DcApiDeviceResponse,
-  PresentationState,
-  TransactionLog,
-} from './lib/types';
-import { v4 as uuidv4 } from 'uuid';
-import { decode } from './lib/cbor';
-import { useEffect, useState } from 'react';
-import DetailDialog from './components/detail-dialog';
-import Button from './components/ui/button';
-import QrCode from './components/qr-code';
-import Header from './components/header';
-import Footer from './components/footer';
+import { useMemo, useState } from 'react';
 import ConfigureDialog from './components/configure-dialog';
-import VerificationTexts from './components/verification-texts';
-import TrustInfoDisplay from './components/trust-info';
+import DetailDialog from './components/detail-dialog';
+import Footer from './components/footer';
+import Header from './components/header';
+import QrCode from './components/qr-code';
 import TransactionLogsDialog from './components/transaction-logs-dialog';
-import { performDcApiVerification, shouldUseDcApi } from './lib/dc-api.ts';
+import TrustInfoDisplay from './components/trust-info';
+import Button from './components/ui/button';
+import VerificationTexts from './components/verification-texts';
+import { useAgeVerification } from './hooks/use-age-verification';
+import { shouldUseDcApi } from './lib/dc-api';
+import {
+  AV_NAMESPACE,
+  AGE_OVER_18_KEY,
+  Fields,
+  PresentationFields,
+} from './lib/types';
 
 function App() {
-  const [verifiedData, setVerifiedData] = useState<
-    | {
-        key: string;
-        value: string | number | boolean;
-      }[]
-    | null
-  >(null);
-  const [isOpen, setIsOpen] = useState(false);
+  const [useDcApi] = useState(shouldUseDcApi);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isConfiguring, setIsConfiguring] = useState(false);
   const [isTransactionLogsOpen, setIsTransactionLogsOpen] = useState(false);
-  const [presentationFields, setPresentationFields] = useState<
-    PresentationFields[]
-  >([
-    {
-      path: ['eu.europa.ec.av.1', 'age_over_18'],
-    },
-  ]);
-  const [trustInfo, setTrustInfo] = useState<TrustInfo[] | null>(null);
-  const [usedDcApi, setUsedDcApi] = useState(false);
-  const [showQrCode, setShowQrCode] = useState(false);
-  const [zkProofValidated, setZkProofValidated] = useState<boolean | null>(
-    null
+
+  const {
+    verifiedData,
+    trustInfo,
+    usedDcApi,
+    zkProofValidated,
+    transactionLogs,
+    query,
+    dcApiMutation,
+    showQrCode,
+    setShowQrCode,
+    updateFields,
+  } = useAgeVerification(useDcApi);
+
+  const isAgeOver18 = useMemo(
+    () => isAgeOver18Confirmed(verifiedData),
+    [verifiedData]
   );
-  const [transactionLogs, setTransactionLogs] = useState<TransactionLog[]>([]);
 
-  const useDcApi = shouldUseDcApi();
-
-  const addLog = (
-    type: TransactionLog['type'],
-    options: {
-      transactionId?: string;
-      request?: unknown;
-      response?: unknown;
-      error?: string;
-    } = {}
-  ) => {
-    const log: TransactionLog = {
-      id: uuidv4(),
-      timestamp: new Date(),
-      type,
-      ...options,
-    };
-    setTransactionLogs((prev) => [...prev, log]);
-  };
-
-  const query = useQuery({
-    queryKey: ['proofRequest', presentationFields],
-    queryFn: async () => {
-      const request = {
-        type: 'vp_token',
-        fields: presentationFields,
-      };
-      const response = await CreatePresentationRequest(presentationFields);
-      addLog('initialized', {
-        transactionId: response.transaction_id,
-        request,
-        response,
-      });
-      return response;
-    },
-    refetchOnWindowFocus: false,
-  });
-
-  const state = useQuery({
-    queryKey: ['proofState', query.data?.transaction_id],
-    queryFn: async () => {
-      try {
-        const response = await GetPresentationState(query.data.transaction_id);
-        addLog('polling', {
-          transactionId: query.data.transaction_id,
-          response,
-        });
-        return response;
-      } catch (error) {
-        addLog('error', {
-          transactionId: query.data.transaction_id,
-          error:
-            error instanceof Error ? error.message : 'Unknown polling error',
-        });
-        throw error;
-      }
-    },
-    enabled:
-      !!query.data?.transaction_id &&
-      verifiedData === null &&
-      (useDcApi || (!useDcApi && showQrCode)),
-    refetchInterval: 1500,
-    retry: false,
-  });
-
-  function updateQuery(fields: Fields) {
+  const handleConfigure = (fields: Fields) => {
     setIsConfiguring(false);
-    const newPresentationFields: PresentationFields[] = Object.keys(fields)
-      .filter((key) => fields[key as keyof Fields])
-      .map((key) => ({
-        path: ['eu.europa.ec.av.1', key],
-      }));
-    setPresentationFields(newPresentationFields);
-    setTransactionLogs([]);
-    query.refetch();
-    dcApiMutation.reset();
-    setShowQrCode(false);
-  }
-
-  const dcApiMutation = useMutation({
-    mutationFn: async (requestId: string) => {
-      addLog('initialized', {
-        request: {
-          method: 'DC API',
-          origin: window.location.origin,
-          requestId,
-        },
-      });
-      return performDcApiVerification(requestId);
-    },
-    onSuccess: (data) => {
-      if (data) {
-        processVerificationResult(data);
-      }
-    },
-    onError: (error) => {
-      console.error(error);
-      addLog('error', {
-        error:
-          error instanceof Error ? error.message : 'DC API verification failed',
-      });
-      alert(`Verification failed: ${error.message}`);
-    },
-  });
-
-  function processVerificationResult(
-    data: DcApiDeviceResponse | PresentationState
-  ) {
-    if ('pages' in data) {
-      const allLines = data.pages.flatMap((page) => page.lines);
-      setVerifiedData(allLines);
-      setUsedDcApi(true);
-      const issuerLine = allLines.find((line) => line.key === 'Issuer');
-      const isTrusted = issuerLine
-        ? !String(issuerLine.value).includes('Not in trust list')
-        : false;
-
-      const zkProofLine = allLines.find((line) => line.key === 'ZK proof');
-      setZkProofValidated(zkProofLine ? true : false);
-
-      setTrustInfo([
-        {
-          issuer_in_trusted_list: isTrusted,
-          is_fully_trusted: isTrusted,
-        },
-      ] as TrustInfo[]);
-
-      addLog('success', {
-        response: data,
-      });
-    } else if ('vp_token' in data) {
-      if (data.trust_info) {
-        setTrustInfo(data.trust_info);
-      }
-      setUsedDcApi(false);
-      setZkProofValidated(null);
-      try {
-        const decodedData = decode(data.vp_token.proof_of_age);
-        if (decodedData.length > 0) {
-          const firstAttestation = decodedData[0];
-          if (
-            firstAttestation.kind === 'single' &&
-            firstAttestation.attributes
-          ) {
-            setVerifiedData(firstAttestation.attributes);
-            addLog('success', {
-              transactionId: query.data?.transaction_id,
-              response: data,
-            });
-          }
-        }
-      } catch (error) {
-        console.error('Failed to decode attestation:', error);
-        addLog('error', {
-          transactionId: query.data?.transaction_id,
-          error:
-            error instanceof Error
-              ? error.message
-              : 'Failed to decode attestation',
-        });
-      }
-    }
-  }
-
-  const isAgeOver18 =
-    !!verifiedData &&
-    verifiedData.some((item) => {
-      const keyMatch =
-        item.key === 'eu.europa.ec.av.1:age_over_18' ||
-        item.key === 'age_over_18';
-      const val = item.value;
-      const valueTrue =
-        val === true ||
-        val === 'true' ||
-        val === 1 ||
-        val === '1' ||
-        val === '"true"';
-      return keyMatch && valueTrue;
-    });
-
-  useEffect(() => {
-    if (state.data && state.data.vp_token && state.data.vp_token.proof_of_age) {
-      processVerificationResult(state.data);
-    }
-
-    return () => {
-      setVerifiedData(null);
-      setTrustInfo(null);
-      setUsedDcApi(false);
-      setZkProofValidated(null);
-    };
-  }, [state.data]);
+    const newFields: PresentationFields[] = (
+      Object.keys(fields) as Array<keyof Fields>
+    )
+      .filter((key) => fields[key])
+      .map((key) => ({ path: [AV_NAMESPACE, key] }));
+    updateFields(newFields);
+  };
 
   return (
     <div className="flex justify-center min-h-screen">
       <div className="w-full sm:w-1/2 flex flex-col p-4">
         <Header
           openConfigureDialog={isConfiguring}
-          setOpenCofigureDialog={setIsConfiguring}
+          setOpenConfigureDialog={setIsConfiguring}
           openTransactionLogsDialog={isTransactionLogsOpen}
           setOpenTransactionLogsDialog={setIsTransactionLogsOpen}
         />
@@ -272,9 +79,8 @@ function App() {
           {!verifiedData ? (
             <div className="mt-8">
               <div className="flex justify-center items-center flex-col min-h-[300px]">
-                {useDcApi ? (
-                  <>
-                    {query.data?.request && (
+                {useDcApi
+                  ? query.data?.request && (
                       <>
                         <Button
                           onClick={() => dcApiMutation.mutate('age_over_18')}
@@ -310,32 +116,27 @@ function App() {
                           </div>
                         )}
                       </>
-                    )}
-                  </>
-                ) : (
-                  query.data?.request && <QrCode data={query.data.request} />
-                )}
+                    )
+                  : query.data?.request && <QrCode data={query.data.request} />}
               </div>
             </div>
           ) : (
             <div className="flex flex-row gap-4 mt-4">
-              {verifiedData && (
-                <>
-                  <Button onClick={() => setIsOpen(true)} text="Show details" />
-                  {/*<Button onClick={() => updateQuery({ age_over_18: true })} text="New Request" />*/}
-                  <DetailDialog
-                    isOpen={isOpen}
-                    setIsOpen={setIsOpen}
-                    verifiedData={verifiedData}
-                  />
-                </>
-              )}
+              <Button
+                onClick={() => setIsDetailOpen(true)}
+                text="Show details"
+              />
+              <DetailDialog
+                isOpen={isDetailOpen}
+                setIsOpen={setIsDetailOpen}
+                verifiedData={verifiedData}
+              />
             </div>
           )}
           <ConfigureDialog
             isOpen={isConfiguring}
             setIsOpen={setIsConfiguring}
-            updateQuery={updateQuery}
+            updateQuery={handleConfigure}
           />
           <TransactionLogsDialog
             isOpen={isTransactionLogsOpen}
@@ -347,6 +148,25 @@ function App() {
       </div>
     </div>
   );
+}
+
+function isAgeOver18Confirmed(
+  verifiedData: { key: string; value: string | number | boolean }[] | null
+): boolean {
+  if (!verifiedData) return false;
+  return verifiedData.some((item) => {
+    const keyMatch =
+      item.key === `${AV_NAMESPACE}:${AGE_OVER_18_KEY}` ||
+      item.key === AGE_OVER_18_KEY;
+    const val = item.value;
+    const valueTrue =
+      val === true ||
+      val === 'true' ||
+      val === 1 ||
+      val === '1' ||
+      val === '"true"';
+    return keyMatch && valueTrue;
+  });
 }
 
 export default App;
