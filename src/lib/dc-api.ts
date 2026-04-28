@@ -23,7 +23,6 @@ export function isDcApiAvailable(): boolean {
  * Determines if the DC-API flow should be used.
  */
 export function shouldUseDcApi(): boolean {
-  console.log('isDcApiAvailable', isDcApiAvailable());
   return isDcApiAvailable();
 }
 
@@ -81,8 +80,6 @@ async function dcRequestCredential(
       data: JSON.parse(dcRequestString),
     });
 
-    console.log(providers);
-
     const credentialsResponse: Credential | null =
       await navigator.credentials.get({
         digital: {
@@ -91,16 +88,11 @@ async function dcRequestCredential(
         mediation: 'required',
       });
 
-    console.log(sessionId);
-
     if (credentialsResponse) {
-      console.log('credentialsResponse');
-      console.log(credentialsResponse);
       const dcResponse = await dcProcessResponse(
         sessionId,
         credentialsResponse
       );
-      console.log(dcResponse);
       return dcResponse;
     }
   } catch (error) {
@@ -123,8 +115,6 @@ async function dcProcessResponse(
     typeof digitalCredential.data === 'string'
       ? digitalCredential.data
       : JSON.stringify(digitalCredential.data);
-
-  console.log(dataStr);
 
   const response = await fetch(`${dcApiVerifierUrl}/verifier/dcGetData`, {
     method: 'POST',

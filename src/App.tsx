@@ -165,7 +165,6 @@ function App() {
   ) {
     if ('pages' in data) {
       const allLines = data.pages.flatMap((page) => page.lines);
-      console.log('allLines', allLines);
       setVerifiedData(allLines);
       setUsedDcApi(true);
       const issuerLine = allLines.find((line) => line.key === 'Issuer');
@@ -237,7 +236,6 @@ function App() {
     });
 
   useEffect(() => {
-    console.log('state.data', state.data);
     if (state.data && state.data.vp_token && state.data.vp_token.proof_of_age) {
       processVerificationResult(state.data);
     }
