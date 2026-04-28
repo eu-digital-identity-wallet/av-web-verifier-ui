@@ -8,21 +8,19 @@ import {
   DialogPanel,
   DialogTitle,
 } from '@headlessui/react';
+import { VerifiedAttribute } from '../lib/types';
+
+interface DetailDialogProps {
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+  verifiedData: VerifiedAttribute[] | null;
+}
 
 export default function DetailDialog({
   isOpen,
   setIsOpen,
   verifiedData,
-}: {
-  isOpen: boolean;
-  setIsOpen: (open: boolean) => void;
-  verifiedData:
-    | {
-        key: string;
-        value: string | number | boolean;
-      }[]
-    | null;
-}) {
+}: DetailDialogProps) {
   return (
     <Dialog
       open={isOpen}

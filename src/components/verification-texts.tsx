@@ -2,16 +2,15 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+import { VerifiedAttribute } from '../lib/types';
+
+interface VerificationTextsProps {
+  verifiedData: VerifiedAttribute[] | null;
+}
+
 export default function VerificationTexts({
   verifiedData,
-}: {
-  verifiedData:
-    | {
-        key: string;
-        value: string | number | boolean;
-      }[]
-    | null;
-}) {
+}: VerificationTextsProps) {
   return (
     <div className="w-3/4">
       <h2 className="text-2xl font-medium mt-8">Prove your age</h2>

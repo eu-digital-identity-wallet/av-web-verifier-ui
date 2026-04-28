@@ -4,17 +4,19 @@
 
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 
-export default function Header({
-  openConfigureDialog,
-  setOpenCofigureDialog,
-  openTransactionLogsDialog,
-  setOpenTransactionLogsDialog,
-}: {
+interface HeaderProps {
   openConfigureDialog: boolean;
-  setOpenCofigureDialog: (open: boolean) => void;
+  setOpenConfigureDialog: (open: boolean) => void;
   openTransactionLogsDialog: boolean;
   setOpenTransactionLogsDialog: (open: boolean) => void;
-}) {
+}
+
+export default function Header({
+  openConfigureDialog,
+  setOpenConfigureDialog,
+  openTransactionLogsDialog,
+  setOpenTransactionLogsDialog,
+}: HeaderProps) {
   return (
     <div className="p-4 shadow-lg rounded-lg flex justify-between items-center">
       <div className="flex items-center gap-4">
@@ -38,7 +40,7 @@ export default function Header({
           <MenuItem>
             <a
               className="block px-4 py-2 rounded cursor-pointer hover:bg-gray-100"
-              onClick={() => setOpenCofigureDialog(!openConfigureDialog)}
+              onClick={() => setOpenConfigureDialog(!openConfigureDialog)}
             >
               Configure Claims
             </a>

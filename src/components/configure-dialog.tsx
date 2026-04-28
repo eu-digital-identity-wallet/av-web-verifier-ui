@@ -11,41 +11,35 @@ import {
   Field,
   Label,
 } from '@headlessui/react';
-import Button from './ui/button';
 import { CheckIcon } from '@heroicons/react/16/solid';
-import { useState, useEffect } from 'react';
-import { Fields } from '../lib/types';
+import { useEffect, useState } from 'react';
+import { AGE_THRESHOLDS, AgeField, Fields } from '../lib/types';
+import Button from './ui/button';
+
+const FIELD_LABELS: { key: AgeField; label: string }[] = AGE_THRESHOLDS.map(
+  (threshold) => ({
+    key: `age_over_${threshold}` as AgeField,
+    label: `Age over ${threshold}`,
+  })
+);
+
+const DEFAULT_FIELDS: Fields = FIELD_LABELS.reduce(
+  (acc, { key }) => ({ ...acc, [key]: key === 'age_over_18' }),
+  {} as Fields
+);
+
+interface ConfigureDialogProps {
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+  updateQuery: (fields: Fields) => void;
+}
 
 export default function ConfigureDialog({
   isOpen,
   setIsOpen,
   updateQuery,
-}: {
-  isOpen: boolean;
-  setIsOpen: (open: boolean) => void;
-  updateQuery: (fields: Fields) => void;
-}) {
-  const [fields, setFields] = useState<Fields>({
-    age_over_18: true,
-    age_over_13: false,
-    age_over_15: false,
-    age_over_16: false,
-    age_over_21: false,
-    age_over_23: false,
-    age_over_25: false,
-    age_over_27: false,
-    age_over_28: false,
-    age_over_40: false,
-    age_over_60: false,
-    age_over_65: false,
-    age_over_67: false,
-    /* issue_date: false,
-    expiry_date: false,
-    issuing_authority: false,
-    issuing_jurisdiction: false,
-    issuing_country: false,*/
-  });
-
+}: ConfigureDialogProps) {
+  const [fields, setFields] = useState<Fields>(DEFAULT_FIELDS);
   const [tempFields, setTempFields] = useState<Fields>(fields);
 
   useEffect(() => {
@@ -54,33 +48,15 @@ export default function ConfigureDialog({
     }
   }, [isOpen, fields]);
 
-  const toggleField = (field: keyof Fields) => {
-    setTempFields((prev) => ({
-      ...prev,
-      [field]: !prev[field],
-    }));
+  const toggleField = (field: AgeField) => {
+    setTempFields((prev) => ({ ...prev, [field]: !prev[field] }));
   };
 
-  const fieldLabels: { key: keyof Fields; label: string }[] = [
-    { key: 'age_over_18', label: 'Age over 18' },
-    { key: 'age_over_13', label: 'Age over 13' },
-    { key: 'age_over_15', label: 'Age over 15' },
-    { key: 'age_over_16', label: 'Age over 16' },
-    { key: 'age_over_21', label: 'Age over 21' },
-    { key: 'age_over_23', label: 'Age over 23' },
-    { key: 'age_over_25', label: 'Age over 25' },
-    { key: 'age_over_27', label: 'Age over 27' },
-    { key: 'age_over_28', label: 'Age over 28' },
-    { key: 'age_over_40', label: 'Age over 40' },
-    { key: 'age_over_60', label: 'Age over 60' },
-    { key: 'age_over_65', label: 'Age over 65' },
-    { key: 'age_over_67', label: 'Age over 67' },
-    /* { key: 'issue_date', label: 'Issuance date' },
-    { key: 'expiry_date', label: 'Expiry date' },
-    { key: 'issuing_authority', label: 'Issuing authority' },
-    { key: 'issuing_jurisdiction', label: 'Issuing jurisdiction' },
-    { key: 'issuing_country', label: 'Issuing country' },*/
-  ];
+  const handleApply = () => {
+    setFields(tempFields);
+    updateQuery(tempFields);
+    setIsOpen(false);
+  };
 
   return (
     <Dialog
@@ -96,7 +72,7 @@ export default function ConfigureDialog({
             Select attributes of the attestation to be included in the request
           </p>
           <div className="flex flex-col gap-4">
-            {fieldLabels.map(({ key, label }) => (
+            {FIELD_LABELS.map(({ key, label }) => (
               <Field key={key} className="flex items-center gap-2">
                 <Checkbox
                   checked={tempFields[key]}
@@ -110,14 +86,7 @@ export default function ConfigureDialog({
             ))}
           </div>
           <div className="flex flex-row gap-4">
-            <Button
-              text="Apply"
-              onClick={() => {
-                setFields(tempFields);
-                updateQuery(tempFields);
-                setIsOpen(false);
-              }}
-            />
+            <Button text="Apply" onClick={handleApply} />
             <Button text="Cancel" onClick={() => setIsOpen(false)} />
           </div>
         </DialogPanel>
