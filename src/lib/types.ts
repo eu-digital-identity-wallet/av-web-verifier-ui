@@ -15,6 +15,11 @@ export interface KeyValue<K, V> {
   value: V;
 }
 
+export type VerifiedAttribute = {
+  key: string;
+  value: string | number | boolean;
+};
+
 export type Single = {
   kind: 'single';
   format: AttestationFormat;
@@ -34,26 +39,15 @@ export type Errored = {
   reason: string;
 };
 
-export type Fields = {
-  age_over_18: boolean;
-  age_over_13: boolean;
-  age_over_15: boolean;
-  age_over_16: boolean;
-  age_over_21: boolean;
-  age_over_23: boolean;
-  age_over_25: boolean;
-  age_over_27: boolean;
-  age_over_28: boolean;
-  age_over_40: boolean;
-  age_over_60: boolean;
-  age_over_65: boolean;
-  age_over_67: boolean;
-  /* issue_date: boolean;
-  expiry_date: boolean;
-  issuing_authority: boolean;
-  issuing_jurisdiction: boolean;
-  issuing_country: boolean;*/
-};
+export const AGE_THRESHOLDS = [
+  13, 15, 16, 18, 21, 23, 25, 27, 28, 40, 60, 65, 67,
+] as const;
+export type AgeThreshold = (typeof AGE_THRESHOLDS)[number];
+export type AgeField = `age_over_${AgeThreshold}`;
+export type Fields = Record<AgeField, boolean>;
+
+export const AV_NAMESPACE = 'eu.europa.ec.av.1';
+export const AGE_OVER_18_KEY: AgeField = 'age_over_18';
 
 export type PresentationFields = {
   path: string[];
@@ -85,7 +79,7 @@ export type PresentationState = {
   trust_info: TrustInfo[];
 };
 
-export type DcApiResponse = {
+export type DcApiChallenge = {
   sessionId: string;
   dcRequestProtocol: string;
   dcRequestString: string;
@@ -96,15 +90,6 @@ export type DcApiResponse = {
 export interface IdentityRequestProvider {
   protocol: string;
   data: object;
-}
-
-export interface DigitalCredentialRequestOptions {
-  requests: IdentityRequestProvider[];
-}
-
-export interface CredentialRequestOptions {
-  digital?: DigitalCredentialRequestOptions;
-  mediation?: 'required' | 'optional' | 'silent';
 }
 
 export interface DcApiDeviceResponse {
@@ -119,6 +104,39 @@ export interface Line {
   key: string;
   value: string;
 }
+
+export type MdocElement = {
+  elementIdentifier: string;
+  elementValue: unknown;
+};
+
+export type IssuerSignedItem = {
+  value: Uint8Array;
+};
+
+export type MdocDocument = {
+  docType: string;
+  issuerSigned: {
+    nameSpaces: Record<string, IssuerSignedItem[]>;
+  };
+};
+
+export type MdocDeviceResponse = {
+  documents: MdocDocument[];
+};
+
+export type VerificationResult =
+  | {
+      source: 'dc-api';
+      attributes: VerifiedAttribute[];
+      trust: TrustInfo[];
+      zkProofValidated: boolean;
+    }
+  | {
+      source: 'openid4vp';
+      attributes: VerifiedAttribute[];
+      trust: TrustInfo[];
+    };
 
 export type TransactionLogType =
   | 'initialized'

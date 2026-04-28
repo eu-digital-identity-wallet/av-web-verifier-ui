@@ -4,21 +4,18 @@
 
 /// <reference types="vite/client" />
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface ImportMetaEnv {
-  readonly VITE_FEATURE_FLAG_DC_API: string;
+  readonly VITE_VERIFIER_BASE_URL: string;
   readonly VITE_DC_API_VERIFIER_BASE_URL: string;
+  readonly VITE_FEATURE_FLAG_DC_API: string;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
 }
 
 declare global {
-  interface Navigator {
-    credentials: CredentialsContainer;
-  }
-
-  interface CredentialsContainer {
-    get(options?: CredentialRequestOptions): Promise<Credential | null>;
-  }
-
   interface IdentityRequestProvider {
     protocol: string;
     data: object;
@@ -31,6 +28,11 @@ declare global {
   interface CredentialRequestOptions {
     digital?: DigitalCredentialRequestOptions;
     mediation?: 'required' | 'optional' | 'silent';
+  }
+
+  interface DigitalCredential extends Credential {
+    readonly protocol: string;
+    readonly data: string | object;
   }
 }
 
