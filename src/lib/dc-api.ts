@@ -57,6 +57,8 @@ async function beginDcApiSession(requestId: string): Promise<DcApiChallenge> {
       protocol: 'w3c_dc_mdoc_api',
       origin: window.location.origin,
       host: window.location.host,
+      multiDocumentRequestId: '',
+      rawDcql: '',
       signRequest: true,
       encryptResponse: true,
     }),
