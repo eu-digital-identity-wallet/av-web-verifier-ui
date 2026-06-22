@@ -12,6 +12,7 @@ import {
   GetPresentationState,
 } from '../lib/presentation';
 import {
+  AV_NAMESPACE,
   DcApiDeviceResponse,
   PresentationFields,
   PresentationState,
@@ -41,7 +42,7 @@ export function useAgeVerification(useDcApi: boolean) {
   const [verifiedData, setVerifiedData] = useState<VerifiedAttribute[] | null>(
     null
   );
-  const [trustInfo, setTrustInfo] = useState<TrustInfo[] | null>(null);
+  const [trustInfo, setTrustInfo] = useState<TrustInfo | null>(null);
   const [usedDcApi, setUsedDcApi] = useState(false);
   const [showQrCode, setShowQrCode] = useState(false);
   const [zkProofValidated, setZkProofValidated] = useState<boolean | null>(
@@ -122,12 +123,26 @@ export function useAgeVerification(useDcApi: boolean) {
         const zkProofLine = allLines.find((line) => line.key === 'ZK proof');
         setZkProofValidated(zkProofLine ? true : false);
 
-        setTrustInfo([
-          {
-            issuer_in_trusted_list: isTrusted,
-            is_fully_trusted: isTrusted,
-          },
-        ] as TrustInfo[]);
+        setTrustInfo({
+          trusted: isTrusted,
+          documents: [
+            {
+              index: 0,
+              document_type: AV_NAMESPACE,
+              valid: isTrusted,
+              // The DC API path has no per-check report from the backend; it only
+              // exposes a single trusted/untrusted signal, mirrored onto both checks.
+              checks: {
+                IssuerChainTrusted: {
+                  status: isTrusted ? 'passed' : 'failed',
+                },
+                NotExpired: {
+                  status: isTrusted ? 'passed' : 'failed',
+                },
+              },
+            },
+          ],
+        });
 
         addLog('success', { response: data });
         return;

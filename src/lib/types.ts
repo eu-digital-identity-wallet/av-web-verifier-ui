@@ -53,14 +53,42 @@ export type PresentationFields = {
   path: string[];
 };
 
+// Verdict of a single validation check, as emitted by the verifier.
+export type CheckStatus = 'passed' | 'skipped' | 'failed';
+
+export type CheckOutcome = {
+  status: CheckStatus;
+  // Human-readable explanation, present for failed (and optionally skipped) checks.
+  detail?: string;
+};
+
+// The mso_mdoc check identifiers emitted by the verifier (MsoMdocCheck enum names).
+export type MsoMdocCheck =
+  | 'IssuerChainTrusted'
+  | 'ValidityInfoPresent'
+  | 'NotExpired'
+  | 'IssuerKeyIsEC'
+  | 'IssuerSignatureValid'
+  | 'DocumentTypeMatches'
+  | 'IssuerSignedItemsValid'
+  | 'NotRevoked'
+  | 'DeviceSignedPresent'
+  | 'DeviceKeyAuthorized'
+  | 'DeviceKeyValid'
+  | 'DeviceSignatureValid';
+
+export type DocumentTrustInfo = {
+  index: number;
+  document_type: string;
+  valid: boolean;
+  checks: Partial<Record<MsoMdocCheck, CheckOutcome>>;
+};
+
+// The per-check trust report returned under `trust_info` by the verifier's
+// get-wallet-response endpoint (only present when always-accept mode is enabled).
 export type TrustInfo = {
-  issuer_in_trusted_list: boolean;
-  issuer_not_expired: boolean;
-  trusted_list_source: string;
-  valid_from: string;
-  valid_until: string;
-  validation_errors: string[];
-  is_fully_trusted: boolean;
+  trusted: boolean;
+  documents: DocumentTrustInfo[];
 };
 
 export type PresentationState = {
@@ -76,7 +104,8 @@ export type PresentationState = {
       path: string;
     }>;
   };
-  trust_info: TrustInfo[];
+  // Present only when the verifier runs in always-accept mode.
+  trust_info?: TrustInfo;
 };
 
 export type DcApiChallenge = {
@@ -129,13 +158,13 @@ export type VerificationResult =
   | {
       source: 'dc-api';
       attributes: VerifiedAttribute[];
-      trust: TrustInfo[];
+      trust: TrustInfo | null;
       zkProofValidated: boolean;
     }
   | {
       source: 'openid4vp';
       attributes: VerifiedAttribute[];
-      trust: TrustInfo[];
+      trust: TrustInfo | null;
     };
 
 export type TransactionLogType =
